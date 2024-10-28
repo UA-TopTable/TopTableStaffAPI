@@ -1,18 +1,16 @@
 from flask import json, jsonify, request
 from flask_restx import Namespace,Resource,fields
-from app.data.models import add_table,get_all_tables
-from app.services.db_service import DBService
-from data.db_session import session
+from services.db_service import add_table,get_all_tables
 
 
 api=Namespace("Restaurant management",description="Operations for managing the restaurant information (including layout)")
 
 dining_table_model=api.model("dining_table",{
     "id":fields.Integer,
-    "description":fields.String(),
-    "table_number":fields.String(),
-    "number_of_seats":fields.Integer(),
-    "table_type":fields.String()
+    "description":fields.String,
+    "table_number":fields.String,
+    "number_of_seats":fields.Integer,
+    "table_type":fields.String
 })
 
 #add a table to a restaurant
@@ -45,8 +43,7 @@ class Tables(Resource):
             return "Wrong body",400
 
     @api.doc("get all tables") 
-    @api.marshal_list_with()
-    @api.response(200,[dining_table_model])
+    @api.response(200,"returns all tables from restaurant (empty list if the restaurant doesn't exist or doesn't have tables")
     def get(self,id):
         tables,response_code=get_all_tables(id)
 
