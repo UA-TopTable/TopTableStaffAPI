@@ -1,6 +1,6 @@
 from flask import json, jsonify, request
 from flask_restx import Namespace,Resource,fields
-from app.data.models import DiningTable
+from app.data.models import add_table,get_all_tables
 from app.services.db_service import DBService
 from data.db_session import session
 
@@ -40,7 +40,7 @@ class Tables(Resource):
             table_type=data["table_type"]
 
             #and let the service handle the rest
-            table,response_code=db_service.add_table(table_number,number_of_seats,table_type,id,data["description"] if "description" in data else None)
+            table,response_code=add_table(table_number,number_of_seats,table_type,id,data["description"] if "description" in data else None)
             return json.dumps(table),response_code
 
         except KeyError:
@@ -50,6 +50,6 @@ class Tables(Resource):
     @api.marshal_list_with()
     @api.response(200,[dining_table_model])
     def get(self,id):
-        tables,response_code=db_service.get_all_tables(id)
+        tables,response_code=get_all_tables(id)
 
         return tables,response_code
