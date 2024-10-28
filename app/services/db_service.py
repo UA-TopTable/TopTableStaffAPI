@@ -1,4 +1,4 @@
-from data.models import DiningTable
+from data.models.DiningTable import DiningTable
 from sqlalchemy.orm import Session
 from data.db_engine import engine
 
