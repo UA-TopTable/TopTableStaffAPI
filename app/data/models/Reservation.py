@@ -1,5 +1,6 @@
 from sqlalchemy import Column, Integer, String, Text, Enum, DateTime, ForeignKey, CheckConstraint
 from sqlalchemy.sql import func
+from sqlalchemy.orm import relationship
 from . import Base
 
 
@@ -23,3 +24,5 @@ class Reservation(Base):
         CheckConstraint('number_of_people > 0'),
         CheckConstraint('reservation_end_time > reservation_start_time'),
     )
+
+    dining_table=relationship("DiningTable",back_populates="reservations")
