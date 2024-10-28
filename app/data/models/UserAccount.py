@@ -1,8 +1,6 @@
 from sqlalchemy import Column, Integer, String, Enum, DateTime
-from sqlalchemy.orm import declarative_base
 from sqlalchemy.sql import func
-
-Base = declarative_base()
+from . import Base
 
 class UserAccount(Base):
     __tablename__ = 'UserAccount'

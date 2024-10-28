@@ -1,8 +1,7 @@
 from sqlalchemy import Column, Integer, String, Text, Enum, DateTime, ForeignKey, CheckConstraint
-from sqlalchemy.orm import declarative_base
 from sqlalchemy.sql import func
+from . import Base
 
-Base = declarative_base()
 
 class Reservation(Base):
     __tablename__ = 'Reservation'

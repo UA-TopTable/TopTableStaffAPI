@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, Enum, Time, ForeignKey, CheckConstraint
-from sqlalchemy.orm import declarative_base
-Base = declarative_base()
+from . import Base
+
 
 class WorkingHours(Base):
     __tablename__ = 'WorkingHours'
