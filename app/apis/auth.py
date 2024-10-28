@@ -2,10 +2,9 @@ import os
 import boto3
 from flask import current_app, jsonify, request
 from flask_restx import Namespace,Resource,fields
+from services.auth_service import confirm_sign_up, login, sign_out, sign_up
 
 api=Namespace("auth",description="Authentication operations")
-
-cognito=boto3.client('cognito-idp',os.environ["AWS_REGION"])
 
 new_request_metadata_model=api.model("new_request_metadata",{
     "DeviceKey":fields.String,
@@ -39,19 +38,13 @@ class Login(Resource):
             email=data.get("email")
             password=data.get("password")
 
-            response=cognito.initiate_auth(
-                AuthFlow="USER_PASSWORD_AUTH",
-                AuthParameters={
-                    "USERNAME":email,
-                    "PASSWORD":password
-                },
-                ClientId=current_app.config["AWS_COGNITO_USER_POOL_CLIENT_ID"]
-            )
-            return jsonify(response.get("AuthenticationResult"),200)
+            response,status_code=login(email,password)
+            if status_code==200:
+                return jsonify(response.get("AuthenticationResult"),200)
+            else:
+                return response,status_code
         except KeyError:
             return "Incorrect input",400
-        except cognito.exceptions.NotAuthorizedException:
-            return "Wrong username/password",401
         
 @api.route("/sign_up")
 class SignUp(Resource):
@@ -73,26 +66,9 @@ class SignUp(Resource):
             name=data.get("name")
             phone_number=data.get("phone_number")
 
-            cognito.sign_up(
-                ClientId=current_app.config["AWS_COGNITO_USER_POOL_CLIENT_ID"],
-                Username=email,
-                Password=password,
-                UserAttributes=[
-                    {
-                        "Name": "name",
-                        "Value":name
-                    },
-                    {
-                        "Name": "phone_number",
-                        "Value":phone_number
-                    }
-                ]
-            )
-            return "User created. Confirm registration via email"
+            return sign_up(email,password,name,phone_number)
         except KeyError:
             return "Wrong Body",400
-        except cognito.exceptions.UsernameExistsException:
-            return "Username already exists",409
         
 @api.route("/sign_up/confirm")
 class ConfirmSignUp(Resource):
@@ -110,18 +86,10 @@ class ConfirmSignUp(Resource):
             data=request.json
             email=data.get("email")
             confirmation_code=data.get("confirmation_code")
-            cognito.confirm_sign_up(
-                ClientId=current_app.config["AWS_COGNITO_USER_POOL_CLIENT_ID"],
-                Username=email,
-                ConfirmationCode=confirmation_code
-            )
-            return "user confirmed",200
+            return confirm_sign_up(email,confirmation_code)
         except KeyError:
             return "Wrong body",400
-        except cognito.exceptions.CodeMismatchException:
-            return "Wrong confirmation code",400
-        except cognito.exceptions.ExpiredCodeException:
-            return "Confirmation code expired",410
+        
         
 @api.route("/sign_out")
 class SignOut(Resource):
@@ -136,9 +104,6 @@ class SignOut(Resource):
         try:
             data=request.json
             access_token=data.get("access_token")
-            cognito.global_sign_out(AccessToken=access_token)
-            return "signed out successful",200
+            return sign_out(access_token)
         except KeyError:
             return "Wrong body",400
-        except cognito.exceptions.NotAuthorizedException:
-            return "Invalid access token",401
