@@ -15,8 +15,6 @@ dining_table_model=api.model("dining_table",{
     "table_type":fields.String()
 })
 
-db_service=DBService()
-
 #add a table to a restaurant
 @api.route("/restaurant/<id>/tables",doc={"params":{"id":"restaurant_id"}})
 class Tables(Resource):
