@@ -1,4 +1,4 @@
-from flask import render_template
+from flask import make_response, render_template
 from flask_restx import Namespace,Resource
 from services.db_service import get_restaurant,get_all_tables
 
@@ -11,5 +11,5 @@ class RestaurantPage(Resource):
         if restaurant is None:
             return "Restaurant not found",404
         else:
-            tables=get_all_tables
-            return render_template("restaurant.html",restaurant=restaurant,tables=tables)
+            tables,_=get_all_tables(id)
+            return make_response(render_template("restaurant.html",restaurant=restaurant,tables=tables),200,{'Content-Type': 'text/html'})

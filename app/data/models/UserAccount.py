@@ -15,3 +15,8 @@ class UserAccount(Base,SerializerMixin):
     password_hash = Column(String(255), nullable=False)
     created_date = Column(DateTime, server_default=func.now())
     updated_date = Column(DateTime, server_default=func.now(), onupdate=func.now())
+
+    def to_dict(self):
+        data=super().to_dict
+        data["user_type"]=str(self.user_type)
+        return data

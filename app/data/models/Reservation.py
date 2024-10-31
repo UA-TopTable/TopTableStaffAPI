@@ -27,3 +27,8 @@ class Reservation(Base,SerializerMixin):
     )
 
     dining_table=relationship("DiningTable",back_populates="reservations",lazy="joined")
+
+    def to_dict(self):
+        data=super().to_dict
+        data["status"]=str(self.status)
+        return data
