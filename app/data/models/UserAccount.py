@@ -1,8 +1,9 @@
 from sqlalchemy import Column, Integer, String, Enum, DateTime
 from sqlalchemy.sql import func
+from sqlalchemy_serializer import SerializerMixin
 from . import Base
 
-class UserAccount(Base):
+class UserAccount(Base,SerializerMixin):
     __tablename__ = 'UserAccount'
 
     id = Column(Integer, primary_key=True, autoincrement=True)

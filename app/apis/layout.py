@@ -38,7 +38,7 @@ class Tables(Resource):
 
             #and let the service handle the rest
             table,response_code=add_table(table_number,number_of_seats,table_type,id,data["description"] if "description" in data else None)
-            return json.dumps(table),response_code
+            return table,response_code
 
         except KeyError:
             return "Wrong body",400
