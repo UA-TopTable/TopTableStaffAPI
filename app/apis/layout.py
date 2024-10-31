@@ -27,6 +27,7 @@ class Tables(Resource):
     @api.response(400,"Wrong body")
     @api.response(400,"table_type must be either 'indoors' or 'outdoors'")
     @api.response(400,"table_number must not have more than 3 digits")
+    @api.response(404,"restaurant does not exist")
     def post(self,id):
         try:
             #do the data extraction
