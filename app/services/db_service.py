@@ -11,7 +11,7 @@ def add_table(table_number,number_of_seats,table_type,restaurant_id,description=
         return "restaurant does not exist",404
 
     if table_type not in ["indoor","outdoor"]:
-        return "table_type must be either 'indoors' or 'outdoors'",400
+        return "table_type must be either 'indoor' or 'outdoor'",400
     if len(table_number)>3:
         return "table_number must not have more than 3 digits",400
     if description is not None:

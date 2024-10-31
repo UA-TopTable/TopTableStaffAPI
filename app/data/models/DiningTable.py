@@ -17,7 +17,7 @@ class DiningTable(Base,SerializerMixin):
     restaurant = relationship("Restaurant", back_populates="dining_tables",lazy="joined")
     reservations = relationship("Reservation", back_populates="dining_table",lazy="joined")
 
-    serialize_rules=("-reservations.dining_table",)
+    serialize_rules=("-reservations.dining_tables",)
 
     def to_dict(self):
         data=super().to_dict()
