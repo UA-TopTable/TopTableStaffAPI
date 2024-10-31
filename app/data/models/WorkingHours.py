@@ -15,3 +15,8 @@ class WorkingHours(Base,SerializerMixin):
     __table_args__ = (
         CheckConstraint('closing_time > opening_time'),
     )
+
+    def to_dict(self):
+        data=super().to_dict
+        data["day_of_week"]=str(self.day_of_week)
+        return data

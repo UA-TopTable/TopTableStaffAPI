@@ -19,3 +19,8 @@ class DiningTable(Base,SerializerMixin):
 
     serialize_rules=("-reservations.dining_table",)
 
+    def to_dict(self):
+        data=super().to_dict()
+        data["table_type"]=str(self.table_type)
+        return data
+

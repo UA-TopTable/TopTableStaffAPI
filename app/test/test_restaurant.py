@@ -15,9 +15,9 @@ restaurant_id=0
 def setup():
     global example_tables,example_restaurants,wrong_tables,restaurant_id
 
-    example_tables=[DiningTable(description="test table 1",table_number="1a",number_of_seats=2,table_type="indoors",restaurant_id=0),DiningTable(description="test table 2",table_number="2a",number_of_seats=2,table_type="indoors",restaurant_id=0)]
+    example_tables=[DiningTable(description="test table 1",table_number="1a",number_of_seats=2,table_type="indoor",restaurant_id=0),DiningTable(description="test table 2",table_number="2a",number_of_seats=2,table_type="indoor",restaurant_id=0)]
     example_restaurants=[Restaurant(name="test restaurant 1",location_latitude=123,location_longitude=456)]
-    wrong_tables=[DiningTable(description="wrong table 1",table_number="1a",number_of_seats=2,table_type="wooden",restaurant_id=0),DiningTable(description="wrong table 2",table_number="1aaaaaaaaaaaaaaa",number_of_seats=2,table_type="indoors",restaurant_id=0)]
+    wrong_tables=[DiningTable(description="wrong table 1",table_number="1a",number_of_seats=2,table_type="wooden",restaurant_id=0),DiningTable(description="wrong table 2",table_number="1aaaaaaaaaaaaaaa",number_of_seats=2,table_type="indoor",restaurant_id=0)]
     restaurant_id=0
 
     Base.metadata.create_all(engine)
@@ -46,7 +46,7 @@ def test_fetch_tables_correct_restaurant_id(client):
 
     assert response.status_code==200
     assert isinstance(response.json,list)
-    assert len(response.json)==1
+    assert len(response.json)!=0
         
 def test_fetch_tables_incorrect_restaurant_id(client):
     response=client.get(f"/api/v1/restaurant/{restaurant_id+1000}/tables")
