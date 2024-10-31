@@ -30,4 +30,4 @@ def get_all_tables(restaurant_id):
     
 def get_restaurant(restaurant_id):
     with Session(engine) as session:
-        return session.query(Restaurant).get(restaurant_id)
+        return session.get(Restaurant,restaurant_id)

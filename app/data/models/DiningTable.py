@@ -2,6 +2,7 @@ from sqlalchemy import Column, Integer, String, Text, Enum, ForeignKey
 from sqlalchemy.orm import relationship
 from . import Base
 
+
 class DiningTable(Base):
     __tablename__ = 'DiningTable'
 
