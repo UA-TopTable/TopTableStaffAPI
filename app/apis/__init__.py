@@ -7,6 +7,8 @@ api = Api(version="1.0",title="TopTable Staff API",description="TopTable API for
 
 from .auth import api as api_auth
 from .layout import api as api_layout
+from.ui import api as api_ui
 
 api.add_namespace(api_auth)
 api.add_namespace(api_layout)
+api.add_namespace(api_ui)
