@@ -83,7 +83,10 @@
                 const tableNumber = document.getElementById("table_number").value;
                 const numberOfSeats = document.getElementById("number_of_seats").value;
                 const tableType = document.getElementById("table_type").value;
-                const restaurantId = document.getElementById("restaurant_id").innerHTML;
+
+                const restaurantIdInput = document.getElementById('restaurant_id');
+                const pathArray = window.location.pathname.split('/');
+                const restaurantId = pathArray[pathArray.length - 1]; // récupère le dernier élément du chemin
 
                 // Prepare data for POST request
                 const data = {
