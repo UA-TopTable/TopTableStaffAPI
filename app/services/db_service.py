@@ -2,9 +2,12 @@ from flask import json
 from data.models.Restaurant import Restaurant
 from data.models.DiningTable import DiningTable
 from data.models.UserAccount import UserAccount
+from data.models.RestaurantPictures import RestaurantPictures
+from data.models.WorkingHours import WorkingHours
 from sqlalchemy.orm import Session
 from data.db_engine import engine
 from sqlalchemy.orm.exc import NoResultFound
+from datetime import datetime
 
 
 
@@ -24,25 +27,25 @@ def add_table(table_number,number_of_seats,table_type,restaurant_id,description=
     with Session(engine) as session:
         session.add(table)
         session.commit()
-        return json.dumps(table.to_dict()) if as_json else table,200
+        return json.dumps(table.as_dict()) if as_json else table,200
 
 def get_all_tables(restaurant_id,as_json=True):
     with Session(engine) as session:
         tables=session.query(DiningTable).filter(DiningTable.restaurant_id==restaurant_id).order_by(DiningTable.table_number).all()
-        return [table.to_dict() for table in tables] if as_json else tables,200
+        return [table.as_dict() for table in tables] if as_json else tables,200
     
 def get_restaurant(restaurant_id,as_json=True):
     with Session(engine) as session:
         restaurant=session.get(Restaurant,restaurant_id)
         if restaurant is not None and as_json:
-            return restaurant.to_dict(),200
+            return restaurant.as_dict(),200
         else:
             return restaurant,200
     
 def get_all_restaurants(as_json=True):
     with Session(engine) as session:
         restaurants=session.query(Restaurant).order_by(Restaurant.id).all()
-        return [r.to_dict() for r in restaurants] if as_json else restaurants,200
+        return [r.as_dict() for r in restaurants] if as_json else restaurants,200
     
 def add_user_account(user_data: dict):
     if user_data.get('phone') is None:
@@ -74,3 +77,56 @@ def get_user_by_email(email):
     except NoResultFound:
         return None
     
+    
+def add_picture(picture_link, restaurant_id):
+    with Session(engine) as session :
+        picture = RestaurantPictures(
+            link = picture_link,
+            restaurant_id = restaurant_id
+        )
+        session.add(picture)
+        session.commit()
+        return picture.as_dict() if picture else None
+
+def modify_description(description, restaurant_id):
+    if description == '' or description is None :
+        description = ''
+    with Session(engine) as session :
+        restaurant = session.query(Restaurant).filter(Restaurant.id == restaurant_id).first()
+        if not restaurant :
+            return None
+        restaurant.description = description
+        session.commit()
+        return restaurant.as_dict() if restaurant else None
+    
+def get_working_hours(restaurant_id, day_of_week):
+    try:
+        with Session(engine) as session:
+            return session.query(WorkingHours).filter(WorkingHours.restaurant_id==restaurant_id, WorkingHours.day_of_week == day_of_week).one()
+    except NoResultFound:
+        return None
+
+def add_working_hours(restaurant_id,day_of_week,opening_time,closing_time):
+    if get_restaurant(restaurant_id) is None:
+        return "restaurant does not exist",404
+    if day_of_week.lower() not in ['monday','tuesday','wednesday','thursday','friday','saturday','sunday']:
+        return "day_of_week must be a valid day of the week",400
+    if opening_time>=closing_time:
+        return "closing_time must be after opening_time",400
+    with Session(engine) as session:
+        working_hours=WorkingHours(restaurant_id=restaurant_id,day_of_week=day_of_week,opening_time=opening_time,closing_time=closing_time)
+        session.add(working_hours)
+        session.commit()
+        return working_hours.as_dict() if working_hours else None
+    
+def modify_working_hours(restaurant_id, day_of_week,opening_time,closing_time):
+    working_hours = get_working_hours(restaurant_id, day_of_week)
+    if working_hours is None :
+        return "Not found in the DB", 500
+    with Session(engine) as session:
+        working_hours.opening_time = opening_time
+        working_hours.closing_time = closing_time
+        session.commit()
+        return working_hours.as_dict() if working_hours else None
+
+        
