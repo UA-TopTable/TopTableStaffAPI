@@ -14,18 +14,17 @@ api=Namespace("upload", path="/api/v1/upload", description="Operations to upload
 
 s3_client = boto3.client('s3', region_name=AWS_REGION)
 
-upload_picture_model = api.model('Upload', {
-    'file': fields.String(required=True, description="The name of the file to upload", example="Your picture in the format .jpg, .png, etc.")
-})
-
-upload_description_model = api.model('Upload', {
-    'description': fields.String(required=True, description="The description", example="This is a description")
-})
 
 
 @api.route('/upload_picture/<int:restaurant_id>')
 class ImageUpload(Resource):
-    @api.expect(upload_picture_model)
+    @api.doc("upload a picture")
+    @api.expect({
+        "file":fields.Raw(required=True)
+    })
+    @api.response(200,"File successfully uploaded")
+    @api.response(400,"Invalid file name")
+    @api.response(400,"No file found in the request")
     def post(self, restaurant_id):
         """Upload a picture to S3"""
         if 'file' not in request.files:
@@ -62,7 +61,13 @@ class ImageUpload(Resource):
 
 @api.route('/upload_description/<int:restaurant_id>')
 class DescriptionUpload(Resource):
-    @api.expect(upload_description_model)
+    @api.doc("upload a description")
+    @api.expect({
+        "description":fields.String(required=True)
+    })
+    @api.response(200,"Description successfully modified")
+    @api.response(400,"No description given")
+    @api.response(500,"No restaurant found")
     def post(self,restaurant_id):
         description = request.form.get('description')
         if not description : 
@@ -71,9 +76,9 @@ class DescriptionUpload(Resource):
             #Modify the DB with the new description
             returnedValue = modify_description(description, restaurant_id)
             if returnedValue is None :
-                return {"message" : "No restaurant found"}, 501
+                return {"message" : "No restaurant found"}, 500
             elif returnedValue == '' :
-                return {"message" : "No restaurant found"}, 502
+                return {"message" : "No restaurant found"}, 500
             return {"message": "Description successfully modified", "description":description, "restaurant_id": restaurant_id}, 200
         except Exception as e:
             return {"message": str(e)}, 500
@@ -81,6 +86,14 @@ class DescriptionUpload(Resource):
 
 @api.route('/upload_working_hours/<int:restaurant_id>')
 class DescriptionUpload(Resource):
+    @api.doc("upload working hours")
+    @api.expect({
+        "day":fields.String(required=True),
+        "opening_time":fields.DateTime(required=True),
+        "closing_time":fields.DateTime(required=True)
+    })
+    @api.response(200,"Working hours successfully set")
+    @api.response(400,"Working hours already existing")
     def post(self,restaurant_id):
         day = request.form.get('day')
         start = request.form.get('start')
@@ -102,8 +115,6 @@ class DescriptionUpload(Resource):
                 return {"message": "Working hours already existing", "restaurant_id": restaurant_id}, 400
             else :
                 returned = add_working_hours(restaurant_id, day, start, end)
-                if returned == None:
-                    return {"message": "Not working"}, 500
                 return {"message": "Working hours successfully set", "restaurant_id": restaurant_id}, 200
         except Exception as e:
             return {"message": str(e)}, 500
