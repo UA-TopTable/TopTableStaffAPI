@@ -1,62 +1,67 @@
+import base64
 import os
+import sys
 import boto3
-from flask import current_app
+import requests
+
+from secret import API_URL, AWS_COGNITO_USER_POOL_CLIENT_ID, AWS_COGNITO_USER_POOL_CLIENT_SECRET, AWS_REGION, TOKEN_URL
+from data.models.UserAccount import UserAccount
+from services.db_service import add_user_account, get_user_by_email
 
 
-cognito=boto3.client('cognito-idp',os.environ["AWS_REGION"])
+cognito=boto3.client('cognito-idp',AWS_REGION)
 
-def login(email,password):
+#lazy create: the user is added to the database the first time it is needed
+def get_user(authorization_token):
+    name=None
+    phone_number=None
+    email=None
+    
     try:
-        response=cognito.initiate_auth(
-                AuthFlow="USER_PASSWORD_AUTH",
-                AuthParameters={
-                    "USERNAME":email,
-                    "PASSWORD":password
-                },
-                ClientId=current_app.config["AWS_COGNITO_USER_POOL_CLIENT_ID"]
-        )
+        response=cognito.get_user(AccessToken=authorization_token)
 
-        return response,200
+        #fill in the details
+        for attr in response["UserAttributes"]:
+            if attr["Name"]=="name":
+                name=attr["Value"]
+            elif attr["Name"]=="phone_number":
+                phone_number=attr["Value"]
+            elif attr["Name"]=="email":
+                email=attr["Value"]
+
+        user=get_user_by_email(email)
+        
+        if user is None:
+            name=None
+            phone_number=None
+            for attr in response["UserAttributes"]:
+                if attr["Name"]=="name":
+                    name=attr["Value"]
+                elif attr["Name"]=="phone_number":
+                    phone_number=attr["Value"]
+
+            user=UserAccount(full_name=name,email=email,phone=phone_number,password_hash="something") 
+            return add_user_account(user.as_dict())
+        else:
+            return user.as_dict()
     except cognito.exceptions.NotAuthorizedException:
-        return "Wrong username/password",401
-    
-def sign_up(email,password,name,phone_number):
-    try:
-        cognito.sign_up(
-            ClientId=current_app.config["AWS_COGNITO_USER_POOL_CLIENT_ID"],
-            Username=email,
-            Password=password,
-            UserAttributes=[
-                {
-                    "Name": "name",
-                    "Value":name
-                },
-                {
-                    "Name": "phone_number",
-                    "Value":phone_number
-                }
-            ]
-        )
-        return "User created. Confirm registration via email",200
-    except cognito.exceptions.UsernameExistsException:
-        return "Username already exists",409
-    
-def confirm_sign_up(email,confirmation_code):
-    try:
-        cognito.confirm_sign_up(
-            ClientId=current_app.config["AWS_COGNITO_USER_POOL_CLIENT_ID"],
-            Username=email,
-            ConfirmationCode=confirmation_code
-        )
-        return "user confirmed",200
-    except cognito.exceptions.CodeMismatchException:
-        return "Wrong confirmation code",400
-    except cognito.exceptions.ExpiredCodeException:
-        return "Confirmation code expired",410
-    
-def sign_out(access_token):
-    try:
-        cognito.global_sign_out(AccessToken=access_token)
-        return "signed out successful",200
-    except cognito.exceptions.NotAuthorizedException:
-        return "Invalid access token",401
+        return None
+
+def exchange_token(authorization_code):
+    message = bytes(f"{AWS_COGNITO_USER_POOL_CLIENT_ID}:{AWS_COGNITO_USER_POOL_CLIENT_SECRET}",'utf-8')
+    secret_hash = base64.b64encode(message).decode()
+    payload = {
+        "grant_type": 'authorization_code',
+        "client_id": AWS_COGNITO_USER_POOL_CLIENT_ID,
+        "code": authorization_code,
+        "redirect_uri": f"{API_URL}/api/v1/auth/redirect"
+    }
+    headers = {"Content-Type": "application/x-www-form-urlencoded",
+        "Authorization": f"Basic {secret_hash}"}
+           
+    response = requests.post(TOKEN_URL, params=payload, headers=headers)
+    if response.status_code==200:
+        tokens = response.json()
+        return tokens.get("access_token")
+    else:
+        return None

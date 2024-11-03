@@ -1,8 +1,10 @@
 from flask import json
 from data.models.Restaurant import Restaurant
 from data.models.DiningTable import DiningTable
+from data.models.UserAccount import UserAccount
 from sqlalchemy.orm import Session
 from data.db_engine import engine
+from sqlalchemy.orm.exc import NoResultFound
 
 
 
@@ -41,4 +43,11 @@ def get_all_restaurants(as_json=True):
     with Session(engine) as session:
         restaurants=session.query(Restaurant).order_by(Restaurant.id).all()
         return [r.to_dict() for r in restaurants] if as_json else restaurants,200
+    
+def get_user_by_email(email):
+    try:
+        with Session(engine) as session:
+            return session.query(UserAccount).filter(UserAccount.email==email).one()
+    except NoResultFound:
+        return None
     
