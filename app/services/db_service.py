@@ -44,6 +44,29 @@ def get_all_restaurants(as_json=True):
         restaurants=session.query(Restaurant).order_by(Restaurant.id).all()
         return [r.to_dict() for r in restaurants] if as_json else restaurants,200
     
+def add_user_account(user_data: dict):
+    if user_data.get('phone') is None:
+        user_data['phone'] = ''
+    if user_data.get('profile_image_url') is None:
+        user_data['profile_image_url'] = ''
+    if user_data.get('user_type') is None:
+        user_data['user_type'] = 'regular'
+    with Session(engine) as session:
+        
+        user = UserAccount(
+            full_name=user_data.get('full_name'),
+            email=user_data.get('email'),
+            phone=user_data.get('phone'),
+            profile_image_url=user_data.get('profile_image_url'),
+            user_type=user_data.get('user_type'),
+            password_hash=user_data.get('password_hash')
+        )
+
+        session.add(user)
+        session.commit()
+        
+        return user.as_dict() if user else None
+
 def get_user_by_email(email):
     try:
         with Session(engine) as session:
