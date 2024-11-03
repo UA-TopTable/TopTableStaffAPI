@@ -7,7 +7,7 @@ api=Namespace("ui",description="UI-related endpoints")
 
 @api.route("/restaurant/<int:id>")
 class RestaurantPage(Resource):
-    def get(self,id):
+    def get(self, id):
         tables = get_all_tables(id)
         restaurant = get_restaurant(id)
         if restaurant is None:

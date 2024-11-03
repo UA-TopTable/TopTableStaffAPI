@@ -29,10 +29,10 @@ def add_table(table_number,number_of_seats,table_type,restaurant_id,description=
         session.commit()
         return json.dumps(table.as_dict()) if as_json else table,200
 
-def get_all_tables(restaurant_id,as_json=True):
+def get_all_tables(restaurant_id):
     with Session(engine) as session:
-        tables=session.query(DiningTable).filter(DiningTable.restaurant_id==restaurant_id).order_by(DiningTable.table_number).all()
-        return [table.as_dict() for table in tables] if as_json else tables,200
+        tables=session.query(DiningTable).filter(DiningTable.restaurant_id==restaurant_id).all()
+        return [table.as_dict() for table in tables] if tables else None
     
 def get_restaurant(restaurant_id,as_json=True):
     with Session(engine) as session:
