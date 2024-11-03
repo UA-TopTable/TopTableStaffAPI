@@ -3,7 +3,7 @@ from flask_restx import Namespace,Resource,fields
 from services.db_service import add_table,get_all_tables,get_all_restaurants
 
 
-api=Namespace("restaurant",description="Operations for managing the restaurant information (including layout)")
+api=Namespace("restaurant",path="/api/v1/restaurant",description="Operations for managing the restaurant information (including layout)")
 
 dining_table_model=api.model("dining_table",{
     "id":fields.Integer,
