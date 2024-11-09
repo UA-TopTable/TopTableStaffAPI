@@ -1,63 +1,120 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base.html" %}
+{% block content %}
+<h1>Edit restaurant details:</h1>
 
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{{ restaurant.name }} - Details</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
-</head>
+<div class="row">
+    <form id="descriptionForm">
+        <div class="row form-group">
+            <label for="description">Description :</label>
+            <textarea type="text" id="description" name="description" rows="5" maxlength="256" class="form-control"
+                required></textarea>
+        </div>
+        <div class="d-flex row">
+            <div class="p-2"><button type="submit" class="btn btn-primary">Send</button></div>
+        </div>
+    </form>
+</div>
 
-<body>
-    <div class="alert alert-danger alert-dismissible fade show" id="error_alert" style="display: none">
-        There was an error during creation
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+<div class="row">
+    <div class="col">
+        <h3>Add picture</h3>
+        <form id="uploadForm">
+            <div class="row">
+                <label for="file" class="form-label">Select a picture :</label>
+            </div>
+            <div class="d-flex flex-row gap-3">
+                <div class="p-2">
+                    <input type="file" id="file" name="file" accept="image/*" class="form-control-file" required>
+                </div>
+                <div class="p-2 pt-1">
+                    <button type="submit" class="btn btn-primary">Upload</button>
+                </div>
+            </div>
+        </form>
     </div>
 
-    <p class="mt-2 mx-2 mb-0">Registered Tables:</p>
+    <div class="col">
+        <h3>Add working hours</h3>
+        <form id="scheduleForm">
+
+            <div class="row">
+
+                <div class="col form-group">
+                    <label for="day" class="form-label">Day:</label>
+                    <select id="day" name="day" class="form-control" value="monday" required>
+                        {% for day in ["monday","tuesday","wednesday","thursday","friday","saturday","sunday"] %}
+                        <option value="{{day}}">{{day}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col form-group">
+                    <label for="start" class="form-label">Opening hour:</label>
+                    <input type="time" id="start" name="start" class="form-control" required>
+                </div>
+
+                <div class="col form-group">
+                    <label for="end" class="form-label">Closing hour:</label>
+                    <input type="time" id="end" name="end" class="form-control" required>
+                    <br>
+                </div>
+
+                <div class="d-flex flex-column col justify-content-center">
+                    <div class="p-2 pt-3">
+                        <button type="submit" class="btn btn-primary">Send</button>
+                    </div>
+                </div>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<h1 class="mt-5 mx-2 mb-0">Registered Tables:</h1>
+<div class="list-container">
     <ul class="list-group mx-2" id="tables_list">
         <li class="list-group-item" style="
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          width: 100%;
-        ">
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              width: 100%;
+            ">
             <b>Table number</b>
             <b>Number of seats</b>
             <b>Table type</b>
         </li>
         {% for table in tables %}
         <li class="list-group-item" style="
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          width: 100%;
-        ">
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              width: 100%;
+            ">
             <div>{{table.table_number}}</div>
             <div>{{table.number_of_seats}}</div>
             <div>{{table.table_type}}</div>
         </li>
         {% endfor %}
     </ul>
+</div>
+<div class="mx-2">
     <form id="table_form">
         <div class="list-group-item" style="
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          width: 100%;
-        ">
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              width: 100%;
+            ">
             <input type="text" id="table_number" class="form-control w-25" aria-describedby="insert table number"
                 placeholder="Table Number" />
             <input type="number" id="number_of_seats" class="form-control w-25 mx-5"
                 aria-describedby="insert number of seats" placeholder="Number of Seats" />
-
+    
             <div class="w-25" style="
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-          ">
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+              ">
                 <input type="text" id="table_type" class="form-control" aria-describedby="insert table type"
                     placeholder="Table Type" />
                 <button class="btn btn-primary h-100 w-25" type="submit">
@@ -66,85 +123,73 @@
             </div>
         </div>
     </form>
+</div>
 
-    <span id="restaurant_id" style="display: none">{{restaurant.id}}</span>
+{% endblock %}
 
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4"
-        crossorigin="anonymous"></script>
-
-    <script type="text/javascript">
-        document
-            .getElementById("table_form")
-            .addEventListener("submit", async function (event) {
-                event.preventDefault();
-
-                const tableNumber = document.getElementById("table_number").value;
-                const numberOfSeats = document.getElementById("number_of_seats").value;
-                const tableType = document.getElementById("table_type").value;
-
-                const restaurantIdInput = document.getElementById('restaurant_id');
-                const pathArray = window.location.pathname.split('/');
-                const restaurantId = pathArray[pathArray.length - 1]; // récupère le dernier élément du chemin
-
-                // Prepare data for POST request
-                const data = {
-                    table_number: tableNumber,
-                    number_of_seats: numberOfSeats,
-                    table_type: tableType,
-                };
-
-
-                // Send POST request
-                const response = await fetch(`/api/v1/restaurant/${restaurantId}/tables`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify(data),
-                })
-                if (!response.ok) {
-                    const al = document.getElementById("error_alert");
-                    al.innerHTML = await response.text();
-                    al.style.display = "block";
-                } else {
-                    this.reset();
-                    location.reload();
-                }
-            });
-    </script>
-
-    <h1>Upload a picture</h1>
-    <form id="uploadForm">
-        <label for="file">Select a picture :</label>
-        <input type="file" id="file" name="file" accept="image/*" required>
-
-        <button type="submit">Send</button>
-    </form>
-
-
-    <script>
-        document.getElementById('uploadForm').addEventListener('submit', function(event) {
+{% block scripts %}
+<script type="text/javascript">
+    document
+        .getElementById("table_form")
+        .addEventListener("submit", async function (event) {
             event.preventDefault();
 
-            const formData = new FormData();
-            const fileInput = document.getElementById('file');
+            const tableNumber = document.getElementById("table_number").value;
+            const numberOfSeats = document.getElementById("number_of_seats").value;
+            const tableType = document.getElementById("table_type").value;
+
+            const restaurantIdInput = document.getElementById('restaurant_id');
             const pathArray = window.location.pathname.split('/');
             const restaurantId = pathArray[pathArray.length - 1]; // récupère le dernier élément du chemin
 
-            if (fileInput.files.length === 0) {
-                alert('Please select a picture to upload.');
-                return;
-            }
+            // Prepare data for POST request
+            const data = {
+                table_number: tableNumber,
+                number_of_seats: numberOfSeats,
+                table_type: tableType,
+            };
 
-            formData.append('file', fileInput.files[0]);
-            formData.append('restaurant_id', restaurantId);
 
-            fetch(`/api/v1/upload/upload_picture/${restaurantId}`, {
-                method: 'POST',
-                body: formData
+            // Send POST request
+            const response = await fetch(`/api/v1/restaurant/${restaurantId}/tables`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(data),
             })
+            if (!response.ok) {
+                const al = document.getElementById("error_alert");
+                al.innerHTML = await response.text();
+                al.style.display = "block";
+            } else {
+                this.reset();
+                location.reload();
+            }
+        });
+</script>
+
+<script>
+    document.getElementById('uploadForm').addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        const formData = new FormData();
+        const fileInput = document.getElementById('file');
+        const pathArray = window.location.pathname.split('/');
+        const restaurantId = pathArray[pathArray.length - 1]; // récupère le dernier élément du chemin
+
+        if (fileInput.files.length === 0) {
+            alert('Please select a picture to upload.');
+            return;
+        }
+
+        formData.append('file', fileInput.files[0]);
+        formData.append('restaurant_id', restaurantId);
+
+        fetch(`/api/v1/upload/upload_picture/${restaurantId}`, {
+            method: 'POST',
+            body: formData
+        })
             .then(response => {
                 if (!response.ok) {
                     throw new Error(response.status);
@@ -157,42 +202,33 @@
             .catch(error => {
                 document.getElementById('response').innerText = 'Error : ' + error.message;
             });
-        });
-    </script>
+    });
+</script>
 
-    <h1>Modify the description</h1>
-    <form id="descriptionForm">
+<script>
+    document.getElementById('descriptionForm').addEventListener('submit', function (event) {
+        event.preventDefault();
 
-        <label for="description">Description :</label>
-        <input type="text" id="description" name="description" required>
+        const formData = new FormData();
+        const descriptionInput = document.getElementById('description');
+        const restaurantIdInput = document.getElementById('restaurant_id');
 
-        <button type="submit">Send</button>
-    </form>
+        const pathArray = window.location.pathname.split('/');
+        const restaurantId = pathArray[pathArray.length - 1]; // récupère le dernier élément du chemin
 
-    <script>
-        document.getElementById('descriptionForm').addEventListener('submit', function(event) {
-            event.preventDefault(); 
 
-            const formData = new FormData();
-            const descriptionInput = document.getElementById('description');
-            const restaurantIdInput = document.getElementById('restaurant_id');
 
-            const pathArray = window.location.pathname.split('/');
-            const restaurantId = pathArray[pathArray.length - 1]; // récupère le dernier élément du chemin
+        if (isNaN(restaurantId)) {
+            alert("Veuillez entrer un nombre valide pour le Restaurant ID.");
+            event.preventDefault();
+        }
+        formData.append('description', descriptionInput.value);
+        formData.append('restaurant_id', restaurantId);
 
-            
-
-            if (isNaN(restaurantId)) {
-                alert("Veuillez entrer un nombre valide pour le Restaurant ID.");
-                event.preventDefault();
-            }
-            formData.append('description', descriptionInput.value);
-            formData.append('restaurant_id', restaurantId);
-
-            fetch(`/api/v1/upload/upload_description/${restaurantId}`, {
-                method: 'POST',
-                body: formData
-            })
+        fetch(`/api/v1/upload/upload_description/${restaurantId}`, {
+            method: 'POST',
+            body: formData
+        })
             .then(response => {
                 if (!response.ok) {
                     throw new Error(response.status);
@@ -205,48 +241,32 @@
             .catch(error => {
                 document.getElementById('response').innerText = 'Error : ' + error.message;
             });
-        });
-    </script>
+    });
+</script>
 
-    <h1>Add working hours</h1>
-    <form id="scheduleForm">
+<script>
+    document.getElementById('scheduleForm').onsubmit = function (event) {
+        event.preventDefault();
 
-        <label for="day">Input the day</label>
-        <input type="text" id="day" name="day" required>
+        const pathArray = window.location.pathname.split('/');
+        const restaurantId = pathArray[pathArray.length - 1]; // récupère le dernier élément du chemin
+        console.log(restaurantId);
 
-        <label for="start">Opening hour :</label>
-        <input type="time" id="start" name="start" required>
+        const dayInput = document.getElementById('day');
+        const startInput = document.getElementById('start');
+        const endInput = document.getElementById('end');
 
-        <label for="end">Closing hour :</label>
-        <input type="time" id="end" name="end" required>
-        <br>
+        const formData = new FormData();
+        formData.append('day', dayInput.value);
+        formData.append('start', startInput.value);
+        formData.append('end', endInput.value);
 
-        <button type="submit">Send</button>
-    </form>
+        console.log("Data sent");
 
-    <script>
-        document.getElementById('scheduleForm').onsubmit = function(event) {
-            event.preventDefault();
-
-            const pathArray = window.location.pathname.split('/');
-            const restaurantId = pathArray[pathArray.length - 1]; // récupère le dernier élément du chemin
-            console.log(restaurantId);
-
-            const dayInput = document.getElementById('day');
-            const startInput = document.getElementById('start');
-            const endInput = document.getElementById('end');
-
-            const formData = new FormData();
-            formData.append('day', dayInput.value);
-            formData.append('start', startInput.value);
-            formData.append('end', endInput.value);
-
-            console.log("Data sent");
-    
-            fetch(`/api/v1/upload/upload_working_hours/${restaurantId}`, {
-                method: 'POST',
-                body: formData
-            })
+        fetch(`/api/v1/upload/upload_working_hours/${restaurantId}`, {
+            method: 'POST',
+            body: formData
+        })
             .then(response => {
                 if (!response.ok) {
                     throw new Error(response.status);
@@ -261,9 +281,9 @@
                 document.getElementById('response').innerText = 'Error : ' + error.message;
                 console.log('Error : ' + error.message)
             });
-        };
-    </script>
-
+    };
+</script>
+{% endblock %}
 </body>
 
 </html>
