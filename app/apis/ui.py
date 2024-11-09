@@ -9,7 +9,8 @@ api=Namespace("ui",description="UI-related endpoints")
 class RestaurantPage(Resource):
     def get(self, id):
         tables = get_all_tables(id)
-        restaurant = get_restaurant(id)
+        restaurant = get_restaurant(id)[0]
+        print(restaurant,file=sys.stderr)
         if restaurant is None:
             return make_response("No restaurant found", 404)
         if tables is None:
