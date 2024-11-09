@@ -41,7 +41,7 @@
 
                 <div class="col form-group">
                     <label for="day" class="form-label">Day:</label>
-                    <select id="day" name="day" class="form-control" value="monday" required>
+                    <select id="day" name="day" class="form-select" value="monday" required>
                         {% for day in ["monday","tuesday","wednesday","thursday","friday","saturday","sunday"] %}
                         <option value="{{day}}">{{day}}</option>
                         {% endfor %}
