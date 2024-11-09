@@ -46,15 +46,15 @@ class Tables(Resource):
     @api.doc("get all tables") 
     @api.response(200,description="restaurant's tables",model=fields.List(fields.Nested(dining_table_model)))
     def get(self,id):
-        tables,response_code=get_all_tables(id)
+        tables=get_all_tables(id)
 
-        return tables,response_code
+        return tables,200
     
 @api.route("/")
 class Restaurants(Resource):
     @api.doc("get all restaurants") 
     @api.response(200,description="restaurants")
     def get(self):
-        tables,response_code=get_all_restaurants()
+        tables=get_all_restaurants()
 
-        return tables,response_code
+        return tables,200
