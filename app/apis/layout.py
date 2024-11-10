@@ -94,7 +94,7 @@ class Reservations(Resource):
     @api.response(200,description="success")
     @api.response(400,"Wrong body")
     @api.response(404,"reservation does not exist")
-    def put(self,id):
+    def post(self,id):
         data=request.json
         
         if "status" not in data or data["status"] not in ["pending","confirmed","cancelled"] or "reservation_id" not in data:
