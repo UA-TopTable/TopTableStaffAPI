@@ -137,20 +137,15 @@ def get_reservations(restaurant_id):
             Reservation.reservation_start_time <= datetime.now(),
             Reservation.reservation_end_time >= datetime.now()).all()
 
-def cancel_reservation(reservation_id):
+def update_reservation(restaurant_id,reservation_id,status):
     with Session(engine, expire_on_commit=False) as session:
-        reservation = session.get(Reservation, reservation_id)
-        reservation.status = 'cancelled'
+        reservation = session.query(Reservation).filter(Reservation.id == reservation_id,Reservation.restaurant_id==restaurant_id).first()
+        if reservation is None:
+            return None
+        
+        reservation.status = status
         session.commit()
         session.refresh(reservation)
         make_transient(reservation)
         return reservation
     
-def confirm_reservation(reservation_id):
-    with Session(engine, expire_on_commit=False) as session:
-        reservation = session.get(Reservation, reservation_id)
-        reservation.status = 'confirmed'
-        session.commit()
-        session.refresh(reservation)
-        make_transient(reservation)
-        return reservation

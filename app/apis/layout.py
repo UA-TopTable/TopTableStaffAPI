@@ -1,6 +1,6 @@
 from flask import json, jsonify, request
 from flask_restx import Namespace,Resource,fields
-from services.db_service import add_table,get_all_tables,get_all_restaurants
+from services.db_service import add_table,get_all_tables,get_all_restaurants, get_reservations, update_reservation
 
 
 api=Namespace("restaurant",path="/api/v1/restaurant",description="Operations for managing the restaurant information (including layout)")
@@ -11,6 +11,21 @@ dining_table_model=api.model("dining_table",{
     "table_number":fields.String,
     "number_of_seats":fields.Integer,
     "table_type":fields.String
+})
+
+reservation_model=api.model("reservation",{
+    "id":fields.Integer,
+    "user_id":fields.Integer,
+    "restaurant_id":fields.Integer,
+    "dining_table_id":fields.Integer,
+    "number_of_people":fields.Integer,
+    "reservation_start_time":fields.DateTime,
+    "reservation_end_time":fields.DateTime,
+    "status":fields.String,
+    "special_requests":fields.String,
+    "reservation_code":fields.String,
+    "created_date":fields.DateTime,
+    "updated_date":fields.DateTime
 })
 
 #add a table to a restaurant
@@ -58,3 +73,36 @@ class Restaurants(Resource):
         tables=get_all_restaurants()
 
         return tables,200
+    
+@api.route("/<int:id>/reservations",doc={"params":{"id":"restaurant_id"}})
+class Reservations(Resource):
+    @api.doc("show present reservations")
+    @api.response(200,description="present reservations",model=fields.List(fields.Nested(reservation_model)))
+    def get(self,id):
+        reservations=get_reservations(id)
+
+        return reservations,200
+    
+    @api.doc("change reservation status")
+    @api.expect({
+        "status":fields.String(required=True,choices=["pending","confirmed","cancelled"]),
+        "reservation_id":fields.Integer(required=True)
+    })
+    @api.response(200,description="success")
+    @api.response(400,"Wrong body")
+    @api.response(404,"reservation does not exist")
+    def put(self,id):
+        data=request.json
+        
+        if "status" not in data or data["status"] not in ["pending","confirmed","cancelled"] or "reservation_id" not in data:
+            return "Wrong body",400
+
+        status=data["status"]
+        reservation_id=data["reservation_id"]
+
+        result=update_reservation(id,reservation_id,status)
+
+        if result is None:
+            return "reservation does not exist",404
+        else:
+            return "success",200
