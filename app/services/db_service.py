@@ -1,10 +1,11 @@
 from flask import json
+from data.models.Reservation import Reservation
 from data.models.Restaurant import Restaurant
 from data.models.DiningTable import DiningTable
 from data.models.UserAccount import UserAccount
 from data.models.RestaurantPictures import RestaurantPictures
 from data.models.WorkingHours import WorkingHours
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session,make_transient
 from data.db_engine import engine
 from sqlalchemy.orm.exc import NoResultFound
 from datetime import datetime
@@ -129,4 +130,27 @@ def modify_working_hours(restaurant_id, day_of_week,opening_time,closing_time):
         session.commit()
         return working_hours.as_dict() if working_hours else None
 
-        
+def get_reservations(restaurant_id):
+    with Session(engine) as session:
+        return session.query(Reservation).filter(
+            Reservation.restaurant_id == restaurant_id,Reservation.status == 'pending',
+            Reservation.reservation_start_time <= datetime.now(),
+            Reservation.reservation_end_time >= datetime.now()).all()
+
+def cancel_reservation(reservation_id):
+    with Session(engine, expire_on_commit=False) as session:
+        reservation = session.get(Reservation, reservation_id)
+        reservation.status = 'cancelled'
+        session.commit()
+        session.refresh(reservation)
+        make_transient(reservation)
+        return reservation
+    
+def confirm_reservation(reservation_id):
+    with Session(engine, expire_on_commit=False) as session:
+        reservation = session.get(Reservation, reservation_id)
+        reservation.status = 'confirmed'
+        session.commit()
+        session.refresh(reservation)
+        make_transient(reservation)
+        return reservation
