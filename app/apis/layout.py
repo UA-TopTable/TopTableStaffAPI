@@ -1,5 +1,6 @@
 from flask import json, jsonify, request
 from flask_restx import Namespace,Resource,fields
+from sqlalchemy.exc import IntegrityError
 from services.db_service import add_table,get_all_tables,get_all_restaurants, get_reservations, update_reservation
 
 
@@ -57,13 +58,15 @@ class Tables(Resource):
 
         except KeyError:
             return "Wrong body",400
+        except IntegrityError:
+            return "restaurant does not exist",404
 
     @api.doc("get all tables") 
     @api.response(200,description="restaurant's tables",model=fields.List(fields.Nested(dining_table_model)))
     def get(self,id):
         tables=get_all_tables(id)
 
-        return tables,200
+        return tables if tables else [],200
     
 @api.route("/")
 class Restaurants(Resource):
