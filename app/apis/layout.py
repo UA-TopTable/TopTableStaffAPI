@@ -84,7 +84,7 @@ class Reservations(Resource):
     def get(self,id):
         reservations=get_reservations(id)
 
-        return reservations,200
+        return [reservation.as_dict() for reservation in reservations],200
     
     @api.doc("change reservation status")
     @api.expect({
