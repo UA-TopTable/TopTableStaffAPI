@@ -26,6 +26,7 @@ class RestaurantPage(Resource):
 class ReservationsPage(Resource):
     def get(self, id):
         reservations_raw=get_reservations(id)
+        print(reservations_raw,file=sys.stderr)
 
         reservations=[]
         #get table number and customer name to make it more human-readable
@@ -41,7 +42,7 @@ class ReservationsPage(Resource):
             reservations.append(reservation)
 
         return make_response(
-            render_template("reservations.html", reservations=reservations),
+            render_template("reservations.html", reservations=reservations,restaurant_id=id),
             200,
             {'Content-Type': 'text/html'}
         )

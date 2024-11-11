@@ -133,7 +133,7 @@ def modify_working_hours(restaurant_id, day_of_week,opening_time,closing_time):
 def get_reservations(restaurant_id):
     with Session(engine) as session:
         return session.query(Reservation).filter(
-            Reservation.restaurant_id == restaurant_id,Reservation.status in ['pending','confirmed'],
+            Reservation.restaurant_id == restaurant_id,Reservation.status.in_(['pending','confirmed']),
             Reservation.reservation_start_time <= datetime.now(),
             Reservation.reservation_end_time >= datetime.now()).all()
 

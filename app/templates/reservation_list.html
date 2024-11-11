@@ -23,11 +23,12 @@
             <td>{{reservation.special_requests}}</td>
             <td>
                 {% if can_change_status %}
-                <input type="hidden" name="reservation_id" value="{{reservation.id}}">
-                <form action="url_for('reservations')" method="POST">
-                    <select class="form-select">
+                
+                <form action="{{url_for('reservations', id=restaurant_id) }}" method="POST">
+                    <input type="hidden" name="reservation_id" value="{{reservation.id}}">
+                    <select class="form-select" name="status" onchange="this.form.submit()">
                         {% for status in ["pending","confirmed","cancelled"] %}
-                        <option {% if reservation.status == status %}selected{% endif %} value="{{status}}" onchange="this.form.submit()">{{status}}</option>
+                        <option {% if reservation.status == status %}selected{% endif %} value="{{status}}">{{status}}</option>
                         {% endfor %}
                     </select>
                 </form>
