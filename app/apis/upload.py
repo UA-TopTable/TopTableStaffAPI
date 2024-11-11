@@ -6,6 +6,9 @@ from werkzeug.utils import secure_filename
 from data.db_engine import DATABASE_URL
 from services.db_service import add_picture, modify_description, add_working_hours, get_working_hours, modify_working_hours
 from datetime import datetime
+from string import ascii_letters, digits
+from random import choice
+from os.path import splitext
 
 S3_BUCKET="iapbucket"
 AWS_REGION="us-east-1"
@@ -14,7 +17,11 @@ api=Namespace("upload", path="/api/v1/upload", description="Operations to upload
 
 s3_client = boto3.client('s3', region_name=AWS_REGION)
 
-
+def generate_random_string(length):
+    # choose from all lowercase letter
+    letters = ascii_letters + digits
+    result_str = ''.join(choice(letters) for i in range(length))
+    return result_str
 
 @api.route('/upload_picture/<int:restaurant_id>')
 class ImageUpload(Resource):
@@ -27,36 +34,42 @@ class ImageUpload(Resource):
     @api.response(400,"No file found in the request")
     def post(self, restaurant_id):
         """Upload a picture to S3"""
-        if 'file' not in request.files:
+        if 'files' not in request.files:
             return {"message": "No file found in the request"}, 400
         
         
-        file = request.files['file']
+        files = request.files.getlist('files')
+        for file in files :
+            if file.filename == '':
+                return {"message": "Invalid file name"}, 400
+            
+            _, extension = splitext(file.filename)
+            filename = generate_random_string(32) + extension
 
-        if file.filename == '':
-            return {"message": "Invalid file name"}, 400
-        
-        filename = secure_filename(file.filename)
+            if filename == '':
+                return {"message": "Invalid file name"}, 400
+            
+            filename = secure_filename(filename)
 
-        try:
-            # Upload de l'image à S3
-            s3_client.upload_fileobj(
-                file,
-                S3_BUCKET,
-                filename
-            )
+            try:
+                # Upload de l'image à S3
+                s3_client.upload_fileobj(
+                    file,
+                    S3_BUCKET,
+                    filename
+                )
 
-            file_url = f"https://{S3_BUCKET}.s3.{S3_BUCKET}.amazonaws.com/{filename}"
+                file_url = f"https://{S3_BUCKET}.s3.{S3_BUCKET}.amazonaws.com/{filename}"
 
-            #Fill in the DB with the new image
-            add_picture(file_url, restaurant_id)
+                #Fill in the DB with the new image
+                add_picture(file_url, restaurant_id)
 
-            return {"message": "File successfully uploaded", "file_url": file_url, "restaurant_id": restaurant_id}, 200
+                return {"message": "File successfully uploaded", "file_url": file_url, "restaurant_id": restaurant_id}, 200
 
-        except (NoCredentialsError, PartialCredentialsError):
-            return {"message": "Missing credentials"}, 500
-        except Exception as e:
-            return {"message": str(e)}, 500
+            except (NoCredentialsError, PartialCredentialsError):
+                return {"message": "Missing credentials"}, 500
+            except Exception as e:
+                return {"message": str(e)}, 500
 
 
 @api.route('/upload_description/<int:restaurant_id>')
