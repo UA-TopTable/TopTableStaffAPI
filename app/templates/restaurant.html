@@ -16,14 +16,14 @@
 
 <div class="row mt-3">
     <div class="col">
-        <h3>Add picture</h3>
+        <h3>Add pictures</h3>
         <form id="uploadForm">
             <div class="row">
-                <label for="file" class="form-label">Select a picture :</label>
+                <label for="file" class="form-label">Select pictures :</label>
             </div>
             <div class="d-flex flex-row gap-3">
                 <div class="p-2">
-                    <input type="file" id="file" name="file" accept="image/*" class="form-control-file" required>
+                    <input type="file" id="file" name="file" accept="image/*" class="form-control-file" required multiple>
                 </div>
                 <div class="p-2 pt-1">
                     <button type="submit" class="btn btn-primary">Upload</button>
@@ -173,14 +173,18 @@
         const formData = new FormData();
         const fileInput = document.getElementById('file');
         const pathArray = window.location.pathname.split('/');
-        const restaurantId = pathArray[pathArray.length - 1]; // récupère le dernier élément du chemin
+        const restaurantId = pathArray[pathArray.length - 1]; // Récupère le dernier élément du chemin
 
         if (fileInput.files.length === 0) {
-            alert('Please select a picture to upload.');
+            alert('Please select at least one picture to upload.');
             return;
         }
 
-        formData.append('file', fileInput.files[0]);
+        // Ajouter chaque fichier à formData
+        for (let i = 0; i < fileInput.files.length; i++) {
+            formData.append('files[]', fileInput.files[i]); // 'files[]' pour indiquer un tableau de fichiers
+        }
+
         formData.append('restaurant_id', restaurantId);
 
         fetch(`/api/v1/upload/upload_picture/${restaurantId}`, {
@@ -194,12 +198,13 @@
                 return response.json();
             })
             .then(data => {
-                document.getElementById('response').innerText = 'Image successfully uploaded !';
+                document.getElementById('response').innerText = 'Images successfully uploaded!';
             })
             .catch(error => {
-                document.getElementById('response').innerText = 'Error : ' + error.message;
+                document.getElementById('response').innerText = 'Error: ' + error.message;
             });
     });
+
 </script>
 
 <script>
