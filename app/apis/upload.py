@@ -34,11 +34,13 @@ class ImageUpload(Resource):
     @api.response(400,"No file found in the request")
     def post(self, restaurant_id):
         """Upload a picture to S3"""
-        if 'files' not in request.files:
+        if 'files[]' not in request.files:
             return {"message": "No file found in the request"}, 400
         
         
-        files = request.files.getlist('files')
+        files = request.files.getlist('files[]')
+        uploaded_url = []
+
         for file in files :
             if file.filename == '':
                 return {"message": "Invalid file name"}, 400
@@ -60,16 +62,15 @@ class ImageUpload(Resource):
                 )
 
                 file_url = f"https://{S3_BUCKET}.s3.{S3_BUCKET}.amazonaws.com/{filename}"
-
+                uploaded_url.append(file_url)
                 #Fill in the DB with the new image
                 add_picture(file_url, restaurant_id)
-
-                return {"message": "File successfully uploaded", "file_url": file_url, "restaurant_id": restaurant_id}, 200
 
             except (NoCredentialsError, PartialCredentialsError):
                 return {"message": "Missing credentials"}, 500
             except Exception as e:
                 return {"message": str(e)}, 500
+        return {"message": "Files successfully uploaded", "files_url": file_url, "restaurant_id": restaurant_id}, 200
 
 
 @api.route('/upload_description/<int:restaurant_id>')
