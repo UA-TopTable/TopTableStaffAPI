@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h1>Current reservations:</h1>
+{% include "reservation_list.html" with reservations=reservations, can_change_status=True %}
+
+{% endblock %}

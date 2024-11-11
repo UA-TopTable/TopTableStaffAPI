@@ -133,7 +133,7 @@ def modify_working_hours(restaurant_id, day_of_week,opening_time,closing_time):
 def get_reservations(restaurant_id):
     with Session(engine) as session:
         return session.query(Reservation).filter(
-            Reservation.restaurant_id == restaurant_id,Reservation.status == 'pending',
+            Reservation.restaurant_id == restaurant_id,Reservation.status in ['pending','confirmed'],
             Reservation.reservation_start_time <= datetime.now(),
             Reservation.reservation_end_time >= datetime.now()).all()
 
@@ -148,4 +148,18 @@ def update_reservation(restaurant_id,reservation_id,status):
         session.refresh(reservation)
         make_transient(reservation)
         return reservation
+    
+def get_table_by_id(table_id):
+    try:
+        with Session(engine) as session:
+            return session.query(DiningTable).filter(DiningTable.id==table_id).one()
+    except NoResultFound:
+        return None
+    
+def get_user_by_id(user_id):
+    try:
+        with Session(engine) as session:
+            return session.query(UserAccount).filter(UserAccount.id==user_id).one()
+    except NoResultFound:
+        return None
     
