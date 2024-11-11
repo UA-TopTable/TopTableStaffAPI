@@ -1,10 +1,11 @@
 from flask import json
+from data.models.Reservation import Reservation
 from data.models.Restaurant import Restaurant
 from data.models.DiningTable import DiningTable
 from data.models.UserAccount import UserAccount
 from data.models.RestaurantPictures import RestaurantPictures
 from data.models.WorkingHours import WorkingHours
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session,make_transient
 from data.db_engine import engine
 from sqlalchemy.orm.exc import NoResultFound
 from datetime import datetime
@@ -129,4 +130,36 @@ def modify_working_hours(restaurant_id, day_of_week,opening_time,closing_time):
         session.commit()
         return working_hours.as_dict() if working_hours else None
 
+def get_reservations(restaurant_id):
+    with Session(engine) as session:
+        return session.query(Reservation).filter(
+            Reservation.restaurant_id == restaurant_id,Reservation.status.in_(['pending','confirmed']),
+            Reservation.reservation_start_time <= datetime.now(),
+            Reservation.reservation_end_time >= datetime.now()).all()
+
+def update_reservation(restaurant_id,reservation_id,status):
+    with Session(engine, expire_on_commit=False) as session:
+        reservation = session.query(Reservation).filter(Reservation.id == reservation_id,Reservation.restaurant_id==restaurant_id).first()
+        if reservation is None:
+            return None
         
+        reservation.status = status
+        session.commit()
+        session.refresh(reservation)
+        make_transient(reservation)
+        return reservation
+    
+def get_table_by_id(table_id):
+    try:
+        with Session(engine) as session:
+            return session.query(DiningTable).filter(DiningTable.id==table_id).one()
+    except NoResultFound:
+        return None
+    
+def get_user_by_id(user_id):
+    try:
+        with Session(engine) as session:
+            return session.query(UserAccount).filter(UserAccount.id==user_id).one()
+    except NoResultFound:
+        return None
+    

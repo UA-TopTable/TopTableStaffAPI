@@ -1,6 +1,7 @@
-from flask import json, jsonify, request
+from flask import json, jsonify, redirect, request
 from flask_restx import Namespace,Resource,fields
-from services.db_service import add_table,get_all_tables,get_all_restaurants
+from sqlalchemy.exc import IntegrityError
+from services.db_service import add_table,get_all_tables,get_all_restaurants, get_reservations, update_reservation
 
 
 api=Namespace("restaurant",path="/api/v1/restaurant",description="Operations for managing the restaurant information (including layout)")
@@ -11,6 +12,21 @@ dining_table_model=api.model("dining_table",{
     "table_number":fields.String,
     "number_of_seats":fields.Integer,
     "table_type":fields.String
+})
+
+reservation_model=api.model("reservation",{
+    "id":fields.Integer,
+    "user_id":fields.Integer,
+    "restaurant_id":fields.Integer,
+    "dining_table_id":fields.Integer,
+    "number_of_people":fields.Integer,
+    "reservation_start_time":fields.DateTime,
+    "reservation_end_time":fields.DateTime,
+    "status":fields.String,
+    "special_requests":fields.String,
+    "reservation_code":fields.String,
+    "created_date":fields.DateTime,
+    "updated_date":fields.DateTime
 })
 
 #add a table to a restaurant
@@ -42,13 +58,15 @@ class Tables(Resource):
 
         except KeyError:
             return "Wrong body",400
+        except IntegrityError:
+            return "restaurant does not exist",404
 
     @api.doc("get all tables") 
     @api.response(200,description="restaurant's tables",model=fields.List(fields.Nested(dining_table_model)))
     def get(self,id):
         tables=get_all_tables(id)
 
-        return tables,200
+        return tables if tables else [],200
     
 @api.route("/")
 class Restaurants(Resource):
@@ -58,3 +76,47 @@ class Restaurants(Resource):
         tables=get_all_restaurants()
 
         return tables,200
+    
+@api.route("/<int:id>/reservations",doc={"params":{"id":"restaurant_id"}},endpoint="reservations")
+class Reservations(Resource):
+    @api.doc("show present reservations")
+    @api.response(200,description="present reservations",model=fields.List(fields.Nested(reservation_model)))
+    def get(self,id):
+        reservations=get_reservations(id)
+
+        return [reservation.as_dict() for reservation in reservations],200
+    
+    @api.doc("change reservation status")
+    @api.expect({
+        "status":fields.String(required=True,choices=["pending","confirmed","cancelled"]),
+        "reservation_id":fields.Integer(required=True)
+    })
+    @api.response(200,description="success",model=reservation_model)
+    @api.response(400,"Wrong body")
+    @api.response(404,"reservation does not exist")
+    def post(self,id):
+        if request.form and "status" in request.form and "reservation_id" in request.form:
+            data=request.form
+            from_form=True
+        elif request.json and "status" in request.json and "reservation_id" in request.json:
+            from_form=False
+            data=request.json
+        else:
+            return "Wrong body",400
+       
+
+        status=data["status"]
+        reservation_id=data["reservation_id"]
+
+        if status not in ["pending","confirmed","cancelled"]:
+            return "status must be either 'pending','confirmed' or 'cancelled'",400
+
+        result=update_reservation(id,reservation_id,status)
+
+        if result is None:
+            return "reservation does not exist",404
+        else:
+            if from_form:
+                return redirect(f"/ui/restaurant/{result.restaurant_id}/reservations")
+            else:
+                return result,200
