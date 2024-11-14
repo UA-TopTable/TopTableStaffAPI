@@ -48,29 +48,41 @@ def get_all_restaurants(as_json=True):
         restaurants=session.query(Restaurant).order_by(Restaurant.id).all()
         return [r.as_dict() for r in restaurants] if as_json else restaurants,200
     
-def add_user_account(user_data: dict):
+def save_user_account(user_data: dict):
     if user_data.get('phone') is None:
         user_data['phone'] = ''
     if user_data.get('profile_image_url') is None:
         user_data['profile_image_url'] = ''
     if user_data.get('user_type') is None:
-        user_data['user_type'] = 'regular'
+        user_data['user_type'] = 'customer'
     with Session(engine) as session:
-        
-        user = UserAccount(
+        existing_user = session.query(UserAccount).filter(UserAccount.email == user_data.get('email')).first()
+        if existing_user:
+            existing_user.full_name = user_data.get('full_name')
+            existing_user.phone = user_data.get('phone')
+            existing_user.profile_image_url = user_data.get('profile_image_url')
+            existing_user.user_type = user_data.get('user_type')
+            existing_user.password_hash = user_data.get('password_hash')
+            user = existing_user
+        else:
+            user = UserAccount(
             full_name=user_data.get('full_name'),
             email=user_data.get('email'),
             phone=user_data.get('phone'),
             profile_image_url=user_data.get('profile_image_url'),
             user_type=user_data.get('user_type'),
             password_hash=user_data.get('password_hash')
-        )
-
+            )
         session.add(user)
         session.commit()
         
         return user.as_dict() if user else None
 
+def get_user_account(user_id):
+    with Session(engine) as session:
+        user = session.get(UserAccount, user_id)
+        return user.as_dict() if user else None
+    
 def get_user_by_email(email):
     try:
         with Session(engine) as session:
