@@ -29,8 +29,6 @@ class RestaurantPage(Resource):
                 print(signed_url)
                 picture['link'] = signed_url
 
-
-        print(restaurant,file=sys.stderr)
         if restaurant is None:
             return make_response("No restaurant found", 404)
         if tables is None:

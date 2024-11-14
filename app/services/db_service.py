@@ -104,11 +104,11 @@ def get_working_hours(restaurant_id, day_of_week):
     try:
         if day_of_week is not None : 
             with Session(engine) as session:
-                working_hours = session.query(WorkingHours).filter(WorkingHours.restaurant_id==restaurant_id, WorkingHours.day_of_week == day_of_week).one()
+                return session.query(WorkingHours).filter(WorkingHours.restaurant_id==restaurant_id, WorkingHours.day_of_week == day_of_week).one()
         else : 
             with Session(engine) as session:
                 working_hours = session.query(WorkingHours).filter(WorkingHours.restaurant_id==restaurant_id).all()  
-        return [w.as_dict() for w in working_hours] if working_hours else working_hours,200  
+            return [w.as_dict() for w in working_hours] if working_hours else working_hours,200  
     except NoResultFound:
         return None
 

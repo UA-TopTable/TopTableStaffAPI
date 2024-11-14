@@ -121,11 +121,11 @@ class DescriptionUpload(Resource):
         try:
             #Modify the DB with the new description
             if get_working_hours(restaurant_id, day) is not None :
-                # returned = modify_working_hours(restaurant_id, day, start, end)
-                # if returned == None:
-                #     return {"message": "Not working"}, 500
-                # if not isinstance(returned, dict):
-                #     return returned
+                returned = modify_working_hours(restaurant_id, day, start, end)
+                if returned == None:
+                    return {"message": "Not working"}, 500
+                if not isinstance(returned, dict):
+                    return returned
                 return {"message": "Working hours already existing", "restaurant_id": restaurant_id}, 400
             else :
                 returned = add_working_hours(restaurant_id, day, start, end)
