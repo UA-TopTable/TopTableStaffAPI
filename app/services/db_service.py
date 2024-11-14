@@ -163,3 +163,17 @@ def get_user_by_id(user_id):
     except NoResultFound:
         return None
     
+def add_picture(picture_link, restaurant_id):
+    with Session(engine) as session :
+        picture = RestaurantPictures(
+            link = picture_link,
+            restaurant_id = restaurant_id
+        )
+        session.add(picture)
+        session.commit()
+        return picture.as_dict() if picture else None
+    
+def get_pictures(restaurant_id):
+    with Session(engine) as session :
+        pictures = session.query(RestaurantPictures).filter(RestaurantPictures.restaurant_id == restaurant_id).all()
+        return [picture.as_dict() for picture in pictures] if pictures else None
