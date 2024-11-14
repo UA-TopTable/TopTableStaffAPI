@@ -1,7 +1,7 @@
 from flask import Blueprint
 from flask_restx import Api
 
-from app.secret import ROOT_PATH_PREFIX
+from secret import ROOT_PATH_PREFIX
 
 blueprint = Blueprint('apis', __name__)
 
