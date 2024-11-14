@@ -17,7 +17,7 @@ class RestaurantPage(Resource):
             return make_response("No tables for this restaurant", 404)
         else:
             return make_response(
-                render_template("restaurant.html", restaurant=restaurant, tables=tables),
+                render_template("manage_restaurant.html", restaurant=restaurant, tables=tables),
                 200,
                 {'Content-Type': 'text/html'}
             )
