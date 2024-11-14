@@ -1,7 +1,7 @@
 import base64
 import requests
 
-from secret import API_URL, AWS_COGNITO_USER_POOL_CLIENT_ID, AWS_COGNITO_USER_POOL_CLIENT_SECRET, AWS_REGION, COGNITO_DOMAIN
+from secret import API_URL, AWS_COGNITO_USER_POOL_CLIENT_ID, AWS_COGNITO_USER_POOL_CLIENT_SECRET, COGNITO_DOMAIN
 from data.models.UserAccount import UserAccount
 from services.db_service import save_user_account, get_user_by_email
 
