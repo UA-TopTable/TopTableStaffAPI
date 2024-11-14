@@ -1,12 +1,9 @@
-import boto3
 from flask import redirect, request
 from flask_restx import Namespace,Resource,fields
 from services.auth_service import exchange_token, get_user
-from secret import API_URL, AWS_COGNITO_USER_POOL_CLIENT_ID, AWS_REGION, COGNITO_DOMAIN
+from secret import API_URL, AWS_COGNITO_USER_POOL_CLIENT_ID, COGNITO_DOMAIN
 
 api=Namespace("auth",path="/auth",description="Authentication operations")
-
-cognito=boto3.client('cognito-idp',AWS_REGION)
 
 @api.route("/login")
 class Login(Resource):
