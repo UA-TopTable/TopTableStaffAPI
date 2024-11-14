@@ -3,7 +3,7 @@ import boto3
 from urllib.parse import urlparse
 from flask import make_response, render_template
 from flask_restx import Namespace,Resource
-from services.db_service import get_reservations, get_restaurant, get_all_tables, get_table_by_id, get_user_by_id, get_pictures
+from services.db_service import get_reservations, get_restaurant, get_all_tables, get_table_by_id, get_user_by_id, get_pictures, get_working_hours
 
 api=Namespace("ui",description="UI-related endpoints")
 
@@ -13,6 +13,7 @@ class RestaurantPage(Resource):
         tables = get_all_tables(id)
         restaurant = get_restaurant(id)[0]
         pictures = get_pictures(id)
+        working_hours = get_working_hours(id, None)
         if not (pictures == [] or pictures is None):
             for picture in pictures : 
                 parsed_url = urlparse(picture['link'])
@@ -36,7 +37,7 @@ class RestaurantPage(Resource):
             return make_response("No tables for this restaurant", 404)
         else:
             return make_response(
-                render_template("manage_restaurant.html", restaurant=restaurant, tables=tables, pictures = pictures),
+                render_template("manage_restaurant.html", restaurant=restaurant, tables=tables, pictures = pictures, working_hours = working_hours),
                 200,
                 {'Content-Type': 'text/html'}
             )
