@@ -1,10 +1,11 @@
-import os
-import boto3
 from flask import Flask,jsonify, redirect, request, session
 from flask_restx import Api
 
 from apis import blueprint,api
 from secret import FLASK_SECRET_KEY
+
+from dotenv import load_dotenv
+load_dotenv()
 
 def create_app():
     app = Flask(__name__)
