@@ -79,6 +79,9 @@
                 <div class="row mt-4">
                     <h3>{{restaurant.name}}</h3>
                     <p>{{restaurant.description}}</p>
+                    <button type="button" class="btn btn-primary ms-3" data-bs-toggle="modal" data-bs-target="#uploadModal">
+                        Modify description
+                    </button>
                     <p>{{restaurant.location_address}}</p>
                 </div>
             </div>
@@ -111,14 +114,14 @@
                     </ul>
                 </div>
                 <form id="table_form">
-                    <div class="mx-2 row justify-content-between">
+                    <div class="row justify-content-between">
                         <div class="col">
-                            <input type="text" id="table_number" class="form-control w-25" aria-describedby="insert table number"
+                            <input type="text" id="table_number" class="form-control w-100" aria-describedby="insert table number"
                                 placeholder="Table Number" />
                         </div>
             
                         <div class="col d-flex justify-content-center">
-                            <input type="number" id="number_of_seats" class="form-control w-25 mx-5"
+                            <input type="number" id="number_of_seats" class="form-control w-100"
                                 aria-describedby="insert number of seats" placeholder="Number of Seats" />
                         </div>
                         <div class="col">
@@ -129,7 +132,7 @@
                                     <option value="outdoor">outdoor</option>
                                 </select>
             
-                                <button class="btn btn-primary h-100 w-125" type="submit">
+                                <button class="btn btn-primary h-100 w-100" type="submit">
                                     <i class="fa fa-plus"></i>
                                 </button>
                             </div>
