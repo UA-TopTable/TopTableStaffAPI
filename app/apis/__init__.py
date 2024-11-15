@@ -1,9 +1,12 @@
 from flask import Blueprint
 from flask_restx import Api
+from flask_restx.apidoc import apidoc
 
 from secret import ROOT_PATH_PREFIX
 
 blueprint = Blueprint('apis', __name__, url_prefix=ROOT_PATH_PREFIX)
+
+apidoc.static_url_path = f'{ROOT_PATH_PREFIX}/swaggerui'
 
 api = Api(version="1.0",
           title="TopTable Staff API",
