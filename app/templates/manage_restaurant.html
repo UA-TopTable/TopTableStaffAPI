@@ -322,23 +322,19 @@
             })
                 .then(response => {
                     if (!response.ok) {
-                        console.log("Here is an error")
                         throw new Error(response.status);
                     }
-                    console.log('No error')
                     return response.json();
                 })
                 .then(data => {
-                    console.log("We should hide now");
                     const uploadModal = bootstrap.Modal.getInstance(document.getElementById('uploadModal'));
                     if (uploadModal) {
                         uploadModal.hide();
-                        console.log("We ask bootstrap to hide");
                     }
-                    location.reload;  
+                    window.location.href=`/staff/ui/restaurant/${restaurantId}` 
                 })
                 .catch(error => {
-                    console.log("Ah here there is an error");
+                    console.log("There is an error" + error.message);
                 })
         });
         
@@ -376,6 +372,10 @@
                 })
                 .then(data => {
                     console.log('Description successfully modified');
+                    if (uploadModal) {
+                        uploadModal.hide();
+                    }
+                    window.location.href=`/staff/ui/restaurant/${restaurantId}` 
                 })
                 .catch(error => {
                    console.log('Error : ' + error.message);
