@@ -254,7 +254,7 @@
 
 
                 // Send POST request
-                const response = await fetch(`/api/v1/restaurant/${restaurantId}/tables`, {
+                const response = await fetch(`/staff/api/v1/restaurant/${restaurantId}/tables`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
@@ -293,7 +293,7 @@
 
             formData.append('restaurant_id', restaurantId);
 
-            fetch(`/api/v1/upload/upload_picture/${restaurantId}`, {
+            fetch(`/staff/api/v1/upload/upload_picture/${restaurantId}`, {
                 method: 'POST',
                 body: formData
             })
@@ -333,7 +333,7 @@
             formData.append('description', descriptionInput.value);
             formData.append('restaurant_id', restaurantId);
 
-            fetch(`/api/v1/upload/upload_description/${restaurantId}`, {
+            fetch(`/staff/api/v1/upload/upload_description/${restaurantId}`, {
                 method: 'POST',
                 body: formData
             })
@@ -371,7 +371,7 @@
 
             console.log("Data sent");
 
-            fetch(`/api/v1/upload/upload_working_hours/${restaurantId}`, {
+            fetch(`/staff/api/v1/upload/upload_working_hours/${restaurantId}`, {
                 method: 'POST',
                 body: formData
             })

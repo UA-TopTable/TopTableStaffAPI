@@ -9,8 +9,8 @@ from datetime import datetime
 from string import ascii_letters, digits
 from random import choice
 from os.path import splitext
+from secret import S3_BUCKET
 
-S3_BUCKET="iapbucket"
 AWS_REGION="us-east-1"
 
 api=Namespace("upload", path="/api/v1/upload", description="Operations to upload pictures and description of the restaurant")
