@@ -61,20 +61,19 @@
         <div class="row">
             <div class="col">
                 <div class="row">
-                    {% if pictures %}
                     <div class="d-flex align-items-center">
-                        <img src="{{ pictures[0].link }}" class="restaurant-page-img img-thumbnail"
-                            alt="{{ pictures[0].link }}">
-                        <button type="button" class="btn btn-primary ms-3" data-bs-toggle="modal"
-                            data-bs-target="#photoModal">
-                            Show more pictures
-                        </button>
+                        {% if pictures %}
+                            <img src="{{ pictures[0].link }}" class="restaurant-page-img img-thumbnail"
+                                alt="{{ pictures[0].link }}">
+                            <button type="button" class="btn btn-primary ms-3" data-bs-toggle="modal"
+                                data-bs-target="#photoModal">
+                                Show more pictures
+                            </button>
+                        {% endif %}
                         <button type="button" class="btn btn-primary ms-3" data-bs-toggle="modal" data-bs-target="#uploadModal">
                             Add pictures
                         </button>
-
                     </div>
-                    {% endif %}
                 </div>
                 <div class="row mt-4">
                     <h3>{{restaurant.name}}</h3>
@@ -157,6 +156,7 @@
                                     <td>{{ hour.day_of_week }}</td>
                                     <td>{{ hour.opening_time }}</td>
                                     <td>{{ hour.closing_time }}</td>
+                                    Working hours
                                 </tr>
                             {% endfor %}
                         </tbody>
@@ -308,9 +308,23 @@
                 })
                 .catch(error => {
                     document.getElementById('response').innerText = 'Error: ' + error.message;
-                });
+                })
+                .then(data => {
+                    document.getElementById('uploadForm').style.display = 'none';;
+                    const redirectUrl = `/staff/ui/restaurant/${restaurantId}`;
+                    window.location.href = redirectUrl;  
+                })
         });
+        
+    </script>
 
+    <script>
+        window.onclick = function(event) {
+            const modal = document.getElementById('uploadForm');
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        }
     </script>
 
     <script>
