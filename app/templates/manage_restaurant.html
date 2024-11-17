@@ -78,7 +78,7 @@
                 <div class="row mt-4">
                     <h3>{{restaurant.name}}</h3>
                     <p>{{restaurant.description}}</p>
-                    <button type="button" class="btn btn-primary ms-3" data-bs-toggle="modal" data-bs-target="#uploadModal">
+                    <button type="button" class="btn btn-primary ms-3" data-bs-toggle="modal" data-bs-target="#descriptionModal">
                         Modify description
                     </button>
                     <p>{{restaurant.location_address}}</p>
@@ -302,6 +302,7 @@
                     return response.json();
                 })
                 .then(data => {
+                    document.getElementById('response').innerText = 'Images successfully uploaded!';
                     console.log("We should hide now");
                     const uploadModal = bootstrap.Modal.getInstance(document.getElementById('uploadModal'));
                     if (uploadModal) {
