@@ -372,8 +372,9 @@
                 })
                 .then(data => {
                     console.log('Description successfully modified');
-                    if (uploadModal) {
-                        uploadModal.hide();
+                    const descriptionModal = bootstrap.Modal.getInstance(document.getElementById('descriptionModal'));
+                    if (descriptionModal) {
+                        descriptionModal.hide();
                     }
                     window.location.href=`/staff/ui/restaurant/${restaurantId}` 
                 })
