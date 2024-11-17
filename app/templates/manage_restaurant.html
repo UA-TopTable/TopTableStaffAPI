@@ -200,25 +200,21 @@
     </div>
 
     
-    <div class="modal fade" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true">
+    <div class="modal fade" id="descriptionModal" tabindex="-1" aria-labelledby="descriptionModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="uploadModalLabel">Upload pictures</h5>
+                    <h5 class="modal-title" id="descriptionModalLabel">Upload pictures</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="uploadForm">
-                        <div class="row">
-                            <label for="file" class="form-label">Select pictures :</label>
+                    <form id="descriptionForm">
+                        <div class="row form-group">
+                            <label for="description" class="h3">Description:</label>
+                            <textarea type="text" id="description" name="description" rows="5" maxlength="256" class="form-control" required>{{restaurant.description}}</textarea>
                         </div>
-                        <div class="d-flex flex-row gap-3">
-                            <div class="p-2">
-                                <input type="file" id="file" name="file" accept="image/*" class="form-control-file" required multiple>
-                            </div>
-                            <div class="p-2 pt-1">
-                                <button type="submit" class="btn btn-primary">Upload</button>
-                            </div>
+                        <div class="d-flex row">
+                            <div class="p-2"><button type="submit" class="btn btn-primary">Save</button></div>
                         </div>
                     </form>
                 </div>
@@ -305,12 +301,18 @@
                 })
                 .then(data => {
                     document.getElementById('response').innerText = 'Images successfully uploaded!';
-                    document.getElementById('uploadForm').style.display = 'none';;
+                    console.log("We should hide now");
+                    const uploadModal = bootstrap.Modal.getInstance(document.getElementById('uploadModal'));
+                    if (uploadModal) {
+                        uploadModal.hide();
+                        console.log("We ask bootstrap to hide");
+                    }
                     const redirectUrl = `/staff/ui/restaurant/${restaurantId}`;
                     window.location.href = redirectUrl;  
                 })
                 .catch(error => {
                     document.getElementById('response').innerText = 'Error: ' + error.message;
+                    console.log("Ah here there is an error");
                 })
         });
         
