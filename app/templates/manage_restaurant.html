@@ -60,6 +60,7 @@
     <div class="container mt-5">
         <div class="row">
             <div class="col">
+                <div id="response" style="display: none;" class="alert alert-info"></div>
                 <div class="row">
                     <div class="d-flex align-items-center">
                         {% if pictures %}
@@ -335,8 +336,7 @@
                         uploadModal.hide();
                         console.log("We ask bootstrap to hide");
                     }
-                    const redirectUrl = `/staff/ui/restaurant/${restaurantId}`;
-                    window.location.href = redirectUrl;  
+                    location.reload;  
                 })
                 .catch(error => {
                     document.getElementById('response').innerText = 'Error: ' + error.message;
