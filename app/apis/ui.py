@@ -7,7 +7,6 @@ from services.db_service import get_reservations, get_restaurant, get_all_tables
 
 api=Namespace("ui",description="UI-related endpoints")
 
-
 @api.route("/restaurant/<int:id>")
 class RestaurantPage(Resource):
     def get(self, id):
