@@ -305,26 +305,15 @@
                 })
                 .then(data => {
                     document.getElementById('response').innerText = 'Images successfully uploaded!';
-                })
-                .catch(error => {
-                    document.getElementById('response').innerText = 'Error: ' + error.message;
-                })
-                .then(data => {
                     document.getElementById('uploadForm').style.display = 'none';;
                     const redirectUrl = `/staff/ui/restaurant/${restaurantId}`;
                     window.location.href = redirectUrl;  
                 })
+                .catch(error => {
+                    document.getElementById('response').innerText = 'Error: ' + error.message;
+                })
         });
         
-    </script>
-
-    <script>
-        window.onclick = function(event) {
-            const modal = document.getElementById('uploadForm');
-            if (event.target == modal) {
-                modal.style.display = 'none';
-            }
-        }
     </script>
 
     <script>
