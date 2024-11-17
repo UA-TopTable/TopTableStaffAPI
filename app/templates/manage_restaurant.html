@@ -329,7 +329,6 @@
                     return response.json();
                 })
                 .then(data => {
-                    document.getElementById('response').innerText = 'Images successfully uploaded!';
                     console.log("We should hide now");
                     const uploadModal = bootstrap.Modal.getInstance(document.getElementById('uploadModal'));
                     if (uploadModal) {
@@ -339,7 +338,6 @@
                     location.reload;  
                 })
                 .catch(error => {
-                    document.getElementById('response').innerText = 'Error: ' + error.message;
                     console.log("Ah here there is an error");
                 })
         });
@@ -377,10 +375,10 @@
                     return response.json();
                 })
                 .then(data => {
-                    document.getElementById('response').innerText = 'Description successfully modified';
+                    console.log('Description successfully modified');
                 })
                 .catch(error => {
-                    document.getElementById('response').innerText = 'Error : ' + error.message;
+                   console.log('Error : ' + error.message);
                 });
         });
     </script>
