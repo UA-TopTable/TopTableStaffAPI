@@ -242,3 +242,18 @@ def get_restaurant_by_owner(owner_id):
         restaurant_ids = [r[0] for r in restaurant_ids]
         restaurants = session.query(Restaurant).filter(Restaurant.id.in_(restaurant_ids)).all()
         return [r.as_dict() for r in restaurants] if restaurants else None
+
+def get_coworkers_by_restaurant_id(restaurant_id):
+    with Session(engine) as session:
+        user_ids = session.query(RestaurantOwners).filter(RestaurantOwners.restaurant_id == restaurant_id).all()
+        user_ids = [r.user_id for r in user_ids]
+        users = session.query(UserAccount).filter(UserAccount.id.in_(user_ids)).all()
+        return [r.as_dict() for r in users] if users else None
+
+def add_coworker_to_restaurant(restaurant_id, user_email):
+    with Session(engine) as session:
+        user = session.query(UserAccount).filter(UserAccount.email == user_email).first()
+        restaurant_owner = RestaurantOwners(user_id=user.id, restaurant_id=restaurant_id)
+        session.add(restaurant_owner)
+        session.commit()
+        return restaurant_owner.as_dict() if restaurant_owner else None

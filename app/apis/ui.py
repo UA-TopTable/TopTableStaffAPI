@@ -3,7 +3,7 @@ import boto3
 from urllib.parse import urlparse
 from flask import make_response, render_template
 from flask_restx import Namespace,Resource
-from services.db_service import get_reservations, get_restaurant, get_all_tables, get_table_by_id, get_user_by_id, get_pictures, get_working_hours, get_restaurant_by_owner
+from services.db_service import get_reservations, get_restaurant, get_all_tables, get_table_by_id, get_user_by_id, get_pictures, get_working_hours, get_restaurant_by_owner, get_coworkers_by_restaurant_id
 
 api=Namespace("ui",description="UI-related endpoints")
 
@@ -12,11 +12,10 @@ class RestaurantPage(Resource):
     def get(self, id):
         #TODO: get connected user
         restaurants = get_restaurant_by_owner(1)
-        print(restaurants)
-        print(id)
-        if id not in [restaurant.get('id') for restaurant in restaurants]:
+        if restaurants is None or id not in [restaurant.get('id') for restaurant in restaurants]:
             return make_response("You are not the owner of this restaurant", 403)
 
+        coworkers = get_coworkers_by_restaurant_id(id)
 
         tables = get_all_tables(id)
         restaurant = get_restaurant(id)[0]
@@ -43,7 +42,7 @@ class RestaurantPage(Resource):
             return make_response("No tables for this restaurant", 404)
         else:
             return make_response(
-                render_template("manage_restaurant.html", restaurant=restaurant, tables=tables, pictures = pictures, working_hours = working_hours),
+                render_template("manage_restaurant.html", restaurant=restaurant, tables=tables, pictures = pictures, working_hours = working_hours, coworkers = coworkers),
                 200,
                 {'Content-Type': 'text/html'}
             )

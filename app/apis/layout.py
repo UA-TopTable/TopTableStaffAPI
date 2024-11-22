@@ -120,12 +120,3 @@ class Reservations(Resource):
                 return redirect(f"/ui/restaurant/{result.restaurant_id}/reservations")
             else:
                 return result,200
-            
-@api.route("/<int:owner_id>")
-class OwnerRestaurants(Resource):
-    @api.doc("get owner's restaurants") 
-    @api.response(200,description="owner's restaurants")
-    def get(self,owner_id):
-        restaurants = get_restaurant_by_owner(owner_id)
-
-        return restaurants,200
