@@ -1,3 +1,4 @@
+from decimal import Decimal
 from flask import json
 from data.models.Reservation import Reservation
 from data.models.Restaurant import Restaurant
@@ -194,3 +195,41 @@ def get_pictures(restaurant_id):
     with Session(engine) as session :
         pictures = session.query(RestaurantPictures).filter(RestaurantPictures.restaurant_id == restaurant_id).all()
         return [picture.as_dict() for picture in pictures] if pictures else None
+    
+
+def add_restaurant(restaurant_data: dict):
+    with Session(engine) as session:
+        restaurant = Restaurant(
+            name=restaurant_data['name'],
+            description=restaurant_data.get('description'),
+            location_address=restaurant_data.get('location_address'),
+            location_latitude=Decimal(str(restaurant_data['location_latitude'])),
+            location_longitude=Decimal(str(restaurant_data['location_longitude'])),
+            restaurant_image=restaurant_data.get('restaurant_image'),
+            time_zone=restaurant_data.get('time_zone'),
+            owner_user_id=restaurant_data.get('owner_user_id')
+        )
+        session.add(restaurant)
+        session.commit()
+        return restaurant.as_dict() if restaurant else None
+    
+def add_reservation(user_id,restaurant_id,dining_table_id,number_of_people,reservation_start_time
+                    ,reservation_end_time,reservation_code,special_requests=''):
+    with Session(engine) as session:
+        table = session.get(DiningTable, dining_table_id)
+        if table is None:
+            return None
+        
+        reservation = Reservation(
+            user_id=user_id,
+            restaurant_id=restaurant_id,
+            dining_table_id=dining_table_id,
+            number_of_people=number_of_people,
+            reservation_start_time=reservation_start_time,
+            reservation_end_time=reservation_end_time,
+            status='pending',
+            special_requests=special_requests,
+            reservation_code=reservation_code)
+        session.add(reservation)
+        session.commit()
+        return reservation.as_dict() if reservation else None

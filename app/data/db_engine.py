@@ -3,7 +3,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from data.db_secrets import user,password,host,port,database
 
 
-from .models import Base,UserAccount,WorkingHours,Restaurant,Reservation,DiningTable
+from .models import Base,UserAccount,WorkingHours,Restaurant,Reservation,DiningTable,RestaurantOwners
 
 DATABASE_URL=f"mysql+pymysql://{user}:{password}@{host}:{port}/{database}"
 
