@@ -1,5 +1,6 @@
 from decimal import Decimal
 from flask import json
+from data.models.RestaurantOwners import RestaurantOwners
 from data.models.Reservation import Reservation
 from data.models.Restaurant import Restaurant
 from data.models.DiningTable import DiningTable
@@ -233,3 +234,11 @@ def add_reservation(user_id,restaurant_id,dining_table_id,number_of_people,reser
         session.add(reservation)
         session.commit()
         return reservation.as_dict() if reservation else None
+    
+
+def get_restaurant_by_owner(owner_id):
+    with Session(engine) as session:
+        restaurant_ids = session.query(RestaurantOwners.restaurant_id).filter(RestaurantOwners.user_id == owner_id).all()
+        restaurant_ids = [r[0] for r in restaurant_ids]
+        restaurants = session.query(Restaurant).filter(Restaurant.id.in_(restaurant_ids)).all()
+        return [r.as_dict() for r in restaurants] if restaurants else None

@@ -1,7 +1,7 @@
 from flask import json, jsonify, redirect, request
 from flask_restx import Namespace,Resource,fields
 from sqlalchemy.exc import IntegrityError
-from services.db_service import add_table,get_all_tables,get_all_restaurants, get_reservations, update_reservation
+from services.db_service import add_table,get_all_tables,get_all_restaurants, get_reservations, update_reservation, get_restaurant_by_owner
 
 
 api=Namespace("restaurant",path="/api/v1/restaurant",description="Operations for managing the restaurant information (including layout)")
@@ -120,3 +120,12 @@ class Reservations(Resource):
                 return redirect(f"/ui/restaurant/{result.restaurant_id}/reservations")
             else:
                 return result,200
+            
+@api.route("/<int:owner_id>")
+class OwnerRestaurants(Resource):
+    @api.doc("get owner's restaurants") 
+    @api.response(200,description="owner's restaurants")
+    def get(self,owner_id):
+        restaurants = get_restaurant_by_owner(owner_id)
+
+        return restaurants,200

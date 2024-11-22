@@ -3,13 +3,21 @@ import boto3
 from urllib.parse import urlparse
 from flask import make_response, render_template
 from flask_restx import Namespace,Resource
-from services.db_service import get_reservations, get_restaurant, get_all_tables, get_table_by_id, get_user_by_id, get_pictures, get_working_hours
+from services.db_service import get_reservations, get_restaurant, get_all_tables, get_table_by_id, get_user_by_id, get_pictures, get_working_hours, get_restaurant_by_owner
 
 api=Namespace("ui",description="UI-related endpoints")
 
 @api.route("/restaurant/<int:id>")
 class RestaurantPage(Resource):
     def get(self, id):
+        #TODO: get connected user
+        restaurants = get_restaurant_by_owner(1)
+        print(restaurants)
+        print(id)
+        if id not in [restaurant.get('id') for restaurant in restaurants]:
+            return make_response("You are not the owner of this restaurant", 403)
+
+
         tables = get_all_tables(id)
         restaurant = get_restaurant(id)[0]
         pictures = get_pictures(id)
@@ -64,6 +72,20 @@ class ReservationsPage(Resource):
             200,
             {'Content-Type': 'text/html'}
         )
+
+
+@api.route("/home")
+class HomePage(Resource):
+    def get(self):
+        #TODO: get connected user
+        restaurants = get_restaurant_by_owner(1)
+
+        return make_response(
+            render_template("index.html", restaurants=restaurants),
+            200,
+            {'Content-Type': 'text/html'}
+        )
+
 
 import json
 from datetime import datetime

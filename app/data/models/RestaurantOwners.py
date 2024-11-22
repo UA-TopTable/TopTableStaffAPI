@@ -10,8 +10,6 @@ class RestaurantOwners(Base):
     user_id = Column(Integer, ForeignKey('UserAccount.id'))
     restaurant_id = Column(Integer, ForeignKey('Restaurant.id'))
 
-    user = relationship("UserAccount", back_populates="restaurants")
-    restaurant = relationship("Restaurant", back_populates="owners")
 
     def as_dict(self):
         result = {c.name: getattr(self, c.name) for c in self.__table__.columns}
