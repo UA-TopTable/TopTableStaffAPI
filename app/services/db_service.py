@@ -257,3 +257,11 @@ def add_coworker_to_restaurant(restaurant_id, user_email):
         session.add(restaurant_owner)
         session.commit()
         return restaurant_owner.as_dict() if restaurant_owner else None
+    
+def remove_coworker(restaurant_id, user_id):
+    with Session(engine) as session:
+        restaurant_owner = session.query(RestaurantOwners).filter(RestaurantOwners.restaurant_id == restaurant_id, RestaurantOwners.user_id == user_id).first()
+        session.delete(restaurant_owner)
+        session.commit()
+        return restaurant_owner.as_dict() if restaurant_owner else None
+    

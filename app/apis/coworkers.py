@@ -1,7 +1,7 @@
 from flask import request
 from flask_restx import Namespace,Resource,fields
 from sqlalchemy.exc import IntegrityError
-from services.db_service import get_restaurant_by_owner, add_coworker_to_restaurant
+from services.db_service import get_restaurant_by_owner, add_coworker_to_restaurant, remove_coworker
 
 
 api=Namespace("coworkers",path="/api/v1/coworkers",description="Operations for managing the restaurant coworkers")
@@ -9,6 +9,11 @@ api=Namespace("coworkers",path="/api/v1/coworkers",description="Operations for m
 add_coworker_model = api.model('AddCoworker', {
     'email': fields.String(required=True, description='Email of the coworker'),
     'restaurant_id': fields.Integer(required=True, description='ID of the restaurant')
+})
+
+remove_coworker_model = api.model('RemoveCoworker', {
+    'restaurant_id': fields.Integer(required=True, description='ID of the restaurant'),
+    'user_id': fields.Integer(required=True, description='ID of the coworker')
 })
 
 @api.route("/<int:owner_id>")
@@ -40,3 +45,24 @@ class AddCoworker(Resource):
             return "Wrong body",400
         except IntegrityError:
             return "restaurant does not exist",404
+        
+
+@api.route("/remove_coworker")
+class RemoveCoworker(Resource):
+    @api.doc("remove coworker")
+    @api.expect(remove_coworker_model)
+    @api.response(200,description="success")
+    @api.response(404,"coworker does not exist")
+    def delete(self):
+        try:
+            data=request.json
+            restaurant_id=data["restaurant_id"]
+            user_id=data["user_id"]
+
+            response_code=remove_coworker(restaurant_id, user_id)
+            return response_code
+
+        except KeyError:
+            return "Wrong body",400
+        except IntegrityError:
+            return "coworker does not exist",404

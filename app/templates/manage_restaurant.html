@@ -69,22 +69,25 @@
                 <form id="addCoworkerForm">
                     <div class="input-group mb-3">
                         <input type="hidden" name="restaurant_id" value="{{restaurant.id}}">
-                        <input type="email" name="email" class="form-control" placeholder="User email" aria-describedby="basic-addon2">
+                        <input type="email" name="email" class="form-control" placeholder="User email"
+                            aria-describedby="basic-addon2">
                         <button type="submit" class="input-group-text" id="basic-addon2">+ Add coworker</button>
-                      </div>                      
+                    </div>
                 </form>
                 <ul class="list-group">
-                    <li class="list-group-item" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                    <li class="list-group-item"
+                        style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
                         <b>Name</b>
                         <b>Mail</b>
                         <b>Actions</b>
                     </li>
                     {% for coworker in coworkers %}
-                    <li class="list-group-item" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                    <li class="list-group-item"
+                        style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
                         <div>{{coworker.full_name}}</div>
                         <div>{{coworker.email}}</div>
                         <div>
-                            <button class="btn btn-danger">
+                            <button class="btn btn-danger" onclick="removeCoworker('{{restaurant.id}}', '{{coworker.id}}')">
                                 <i class="bi bi-trash"></i>
                             </button>
                         </div>
@@ -437,26 +440,48 @@
 </script>
 
 <script>
-    document.getElementById("addCoworkerForm").addEventListener("submit", function(event) {
-      event.preventDefault(); 
-      
-      const formData = new FormData(event.target); 
-      const jsonData = Object.fromEntries(formData.entries()); 
-      
-      fetch("/staff/api/v1/coworkers/add_coworker", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(jsonData),
-      })
-      .then(response => response.json())
-      .then(data => console.log(data))
-      .then(() => location.reload())
-      .catch(error => console.error('Error:', error));
+    document.getElementById("addCoworkerForm").addEventListener("submit", function (event) {
+        event.preventDefault();
+
+        const formData = new FormData(event.target);
+        const jsonData = Object.fromEntries(formData.entries());
+
+        fetch("/staff/api/v1/coworkers/add_coworker", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(jsonData),
+        })
+            .then(response => response.json())
+            .then(data => console.log(data))
+            .then(() => location.reload())
+            .then(() => document.getElementById("addCoworkerForm").reset())
+            .catch(error => console.error('Error:', error));
 
     });
-  </script>
+</script>
+
+<script>
+    function removeCoworker(restaurant_id, user_id) {
+        const data = {
+            restaurant_id: parseInt(restaurant_id),
+            user_id: parseInt(user_id)
+        };
+
+        fetch("/staff/api/v1/coworkers/remove_coworker", {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+        })
+            .then(response => response.json())
+            .then(data => console.log(data))
+            .then(() => location.reload())
+            .catch(error => console.error('Error:', error));
+    }
+</script>
 
 
 {% endblock %}
