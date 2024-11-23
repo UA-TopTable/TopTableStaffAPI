@@ -2,6 +2,7 @@ from flask import request
 from flask_restx import Namespace,Resource,fields
 from sqlalchemy.exc import IntegrityError
 from services.db_service import get_restaurant_by_owner, add_coworker_to_restaurant, remove_coworker
+from services.auth_service import get_user
 
 
 api=Namespace("coworkers",path="/api/v1/coworkers",description="Operations for managing the restaurant coworkers")
@@ -39,8 +40,9 @@ class AddCoworker(Resource):
             email=data["email"]
             restaurant_id=data["restaurant_id"]
 
-            #TODO: get connected user
-            restaurants = get_restaurant_by_owner(1)
+            access_token=request.cookies.get("access_token")
+            user=get_user(access_token)
+            restaurants = get_restaurant_by_owner(user.get('id'))
             if restaurants is None or int(restaurant_id) not in [restaurant.get('id') for restaurant in restaurants]:
                 return "You are not the owner of this restaurant", 403
 
@@ -68,8 +70,9 @@ class RemoveCoworker(Resource):
             restaurant_id=data["restaurant_id"]
             user_id=data["user_id"]
 
-            #TODO: get connected user
-            restaurants = get_restaurant_by_owner(1)
+            access_token=request.cookies.get("access_token")
+            user=get_user(access_token)
+            restaurants = get_restaurant_by_owner(user.get('id'))
             if restaurants is None or int(restaurant_id) not in [restaurant.get('id') for restaurant in restaurants]:
                 return "You are not the owner of this restaurant", 403
 
