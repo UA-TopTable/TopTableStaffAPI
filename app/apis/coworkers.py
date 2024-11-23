@@ -41,7 +41,9 @@ class AddCoworker(Resource):
             restaurant_id=data["restaurant_id"]
 
             access_token=request.cookies.get("access_token")
-            user=get_user(access_token)
+            user=get_user(access_token)[0]
+            if user is None:
+                return "You are not logged in", 403
             restaurants = get_restaurant_by_owner(user.get('id'))
             if restaurants is None or int(restaurant_id) not in [restaurant.get('id') for restaurant in restaurants]:
                 return "You are not the owner of this restaurant", 403
@@ -71,7 +73,9 @@ class RemoveCoworker(Resource):
             user_id=data["user_id"]
 
             access_token=request.cookies.get("access_token")
-            user=get_user(access_token)
+            user=get_user(access_token)[0]
+            if user is None:
+                return "You are not logged in", 403
             restaurants = get_restaurant_by_owner(user.get('id'))
             if restaurants is None or int(restaurant_id) not in [restaurant.get('id') for restaurant in restaurants]:
                 return "You are not the owner of this restaurant", 403

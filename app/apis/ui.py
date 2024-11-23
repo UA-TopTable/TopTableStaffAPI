@@ -1,7 +1,7 @@
 import sys
 import boto3
 from urllib.parse import urlparse
-from flask import make_response, render_template, request
+from flask import make_response, redirect, render_template, request
 from flask_restx import Namespace,Resource
 from services.db_service import get_reservations, get_restaurant, get_all_tables, get_table_by_id, get_user_by_id, get_pictures, get_working_hours, get_restaurant_by_owner, get_coworkers_by_restaurant_id
 from services.auth_service import get_user
@@ -12,7 +12,9 @@ api=Namespace("ui",description="UI-related endpoints")
 class RestaurantPage(Resource):
     def get(self, id):
         access_token=request.cookies.get("access_token")
-        user=get_user(access_token)
+        user=get_user(access_token)[0]
+        if user is None:
+            return redirect("/staff/auth/login")
         restaurants = get_restaurant_by_owner(user.get('id'))
         if restaurants is None or id not in [restaurant.get('id') for restaurant in restaurants]:
             return make_response("You are not the owner of this restaurant", 403)
@@ -79,7 +81,9 @@ class ReservationsPage(Resource):
 class HomePage(Resource):
     def get(self):
         access_token=request.cookies.get("access_token")
-        user=get_user(access_token)
+        user=get_user(access_token)[0]
+        if user is None:
+            return redirect("/staff/auth/login")
         restaurants = get_restaurant_by_owner(user.get('id'))
 
         return make_response(
