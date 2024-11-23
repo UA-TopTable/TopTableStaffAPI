@@ -95,7 +95,8 @@ class HomePage(Resource):
 
 import json
 from datetime import datetime
-from services.db_service import add_restaurant, add_table, add_working_hours, add_reservation, save_user_account
+from services.db_service import add_restaurant, add_table, add_working_hours, add_reservation, save_user_account, add_coworker_to_restaurant
+from services.auth_service import get_user
 @api.route("/mock_data")
 class MockDataPage(Resource):
     def get(self):
@@ -134,6 +135,11 @@ class MockDataPage(Resource):
         reservation_code = str(int(datetime.timestamp(datetime.now())))[-10:]
         add_reservation(user_id=user_id, restaurant_id=restr_id, dining_table_id=table_id, number_of_people=4, reservation_code=reservation_code,
                         reservation_start_time=reservation_start_time, reservation_end_time=reservation_end_time)
+        
+        access_token=request.cookies.get("access_token")
+        user=get_user(access_token)[0]
+        add_coworker_to_restaurant(restr_id, user.get('email'))
+
 
 
         return make_response("Successfully mocked data", 200)
