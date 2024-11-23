@@ -32,13 +32,22 @@ class AddCoworker(Resource):
     @api.response(200,description="success")
     @api.response(400,"Wrong body")
     @api.response(404,"restaurant does not exist")
+    @api.response(403,"You are not the owner of this restaurant")
     def post(self):
         try:
             data=request.json
             email=data["email"]
             restaurant_id=data["restaurant_id"]
 
-            response_code=add_coworker_to_restaurant(restaurant_id, email)
+            #TODO: get connected user
+            restaurants = get_restaurant_by_owner(1)
+            if restaurants is None or int(restaurant_id) not in [restaurant.get('id') for restaurant in restaurants]:
+                return "You are not the owner of this restaurant", 403
+
+            try:
+                response_code=add_coworker_to_restaurant(restaurant_id, email)
+            except:
+                return "coworker does not exist",404
             return response_code
 
         except KeyError:
@@ -58,6 +67,11 @@ class RemoveCoworker(Resource):
             data=request.json
             restaurant_id=data["restaurant_id"]
             user_id=data["user_id"]
+
+            #TODO: get connected user
+            restaurants = get_restaurant_by_owner(1)
+            if restaurants is None or int(restaurant_id) not in [restaurant.get('id') for restaurant in restaurants]:
+                return "You are not the owner of this restaurant", 403
 
             response_code=remove_coworker(restaurant_id, user_id)
             return response_code

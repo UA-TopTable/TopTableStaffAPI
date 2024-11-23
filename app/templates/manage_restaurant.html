@@ -87,7 +87,8 @@
                         <div>{{coworker.full_name}}</div>
                         <div>{{coworker.email}}</div>
                         <div>
-                            <button class="btn btn-danger" onclick="removeCoworker('{{restaurant.id}}', '{{coworker.id}}')">
+                            <button class="btn btn-danger"
+                                onclick="removeCoworker('{{restaurant.id}}', '{{coworker.id}}')">
                                 <i class="bi bi-trash"></i>
                             </button>
                         </div>
@@ -453,7 +454,14 @@
             },
             body: JSON.stringify(jsonData),
         })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        alert("User not found.");
+                    }
+                }
+                return response.json();
+            })
             .then(data => console.log(data))
             .then(() => location.reload())
             .then(() => document.getElementById("addCoworkerForm").reset())
