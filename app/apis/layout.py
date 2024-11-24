@@ -1,7 +1,7 @@
 from flask import json, jsonify, redirect, request
 from flask_restx import Namespace,Resource,fields
 from sqlalchemy.exc import IntegrityError
-from services.db_service import add_table,get_all_tables,get_all_restaurants, get_reservations, update_reservation
+from services.db_service import add_table,get_all_tables,get_all_restaurants, get_reservations, update_reservation, get_restaurant_by_owner
 
 
 api=Namespace("restaurant",path="/api/v1/restaurant",description="Operations for managing the restaurant information (including layout)")

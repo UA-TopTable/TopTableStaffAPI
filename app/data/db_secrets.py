@@ -1,4 +1,7 @@
 import os
+from dotenv import load_dotenv
+load_dotenv()
+
 user = os.getenv("DB_USER", "root")
 password = os.getenv("DB_PASSWD", "xxxx")
 host = os.getenv("DB_HOST", "localhost")

@@ -9,14 +9,14 @@ api=Namespace("auth",path="/auth",description="Authentication operations")
 class Login(Resource):
     @api.doc('login via hosted ui')
     def get(self):
-        return redirect(f"https://{COGNITO_DOMAIN}/login?&client_id={AWS_COGNITO_USER_POOL_CLIENT_ID}&redirect_uri={API_URL}/auth/callback&response_type=code")
+        return redirect(f"https://{COGNITO_DOMAIN}/login?&client_id={AWS_COGNITO_USER_POOL_CLIENT_ID}&redirect_uri={API_URL}/staff/auth/callback&response_type=code")
         
 @api.route("/sign_out")
 class SignOut(Resource):
     @api.doc("sign out")
     @api.response(301,"redirecting to home page")
     def post(self):
-        resp=redirect("/") #TODO: change to restaurant home page (when we have one)
+        resp=redirect("/staff/ui/home") #TODO: change to restaurant home page (when we have one)
         resp.delete_cookie("access_token")
         return resp
         
@@ -31,7 +31,7 @@ class Redirect(Resource):
     def get(self):
         if "code" in request.args:
             token=exchange_token(request.args.get("code"))
-            resp=redirect("/") #TODO: change it later
+            resp=redirect("/staff/ui/home") #TODO: change it later
             resp.set_cookie("access_token",token, secure=True, httponly=True)
             return resp
         else:

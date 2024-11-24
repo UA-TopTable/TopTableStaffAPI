@@ -1,15 +1,26 @@
 import sys
 import boto3
 from urllib.parse import urlparse
-from flask import make_response, render_template
+from flask import make_response, redirect, render_template, request
 from flask_restx import Namespace,Resource
-from services.db_service import get_reservations, get_restaurant, get_all_tables, get_table_by_id, get_user_by_id, get_pictures, get_working_hours
+from services.db_service import get_reservations, get_restaurant, get_all_tables, get_table_by_id, get_user_by_id, get_pictures, get_working_hours, get_restaurant_by_owner, get_coworkers_by_restaurant_id
+from services.auth_service import get_user
 
 api=Namespace("ui",description="UI-related endpoints")
 
 @api.route("/restaurant/<int:id>")
 class RestaurantPage(Resource):
     def get(self, id):
+        access_token=request.cookies.get("access_token")
+        user=get_user(access_token)[0]
+        if user is None:
+            return redirect("/staff/auth/login")
+        restaurants = get_restaurant_by_owner(user.get('id'))
+        if restaurants is None or id not in [restaurant.get('id') for restaurant in restaurants]:
+            return make_response("You are not the owner of this restaurant", 403)
+
+        coworkers = get_coworkers_by_restaurant_id(id)
+
         tables = get_all_tables(id)
         restaurant = get_restaurant(id)[0]
         pictures = get_pictures(id)
@@ -35,7 +46,7 @@ class RestaurantPage(Resource):
             return make_response("No tables for this restaurant", 404)
         else:
             return make_response(
-                render_template("manage_restaurant.html", restaurant=restaurant, tables=tables, pictures = pictures, working_hours = working_hours),
+                render_template("manage_restaurant.html", restaurant=restaurant, tables=tables, pictures = pictures, working_hours = working_hours, coworkers = coworkers),
                 200,
                 {'Content-Type': 'text/html'}
             )
@@ -64,3 +75,71 @@ class ReservationsPage(Resource):
             200,
             {'Content-Type': 'text/html'}
         )
+
+
+@api.route("/home")
+class HomePage(Resource):
+    def get(self):
+        access_token=request.cookies.get("access_token")
+        user=get_user(access_token)[0]
+        if user is None:
+            return redirect("/staff/auth/login")
+        restaurants = get_restaurant_by_owner(user.get('id'))
+
+        return make_response(
+            render_template("index.html", restaurants=restaurants),
+            200,
+            {'Content-Type': 'text/html'}
+        )
+
+
+import json
+from datetime import datetime
+from services.db_service import add_restaurant, add_table, add_working_hours, add_reservation, save_user_account, add_coworker_to_restaurant
+from services.auth_service import get_user
+@api.route("/mock_data")
+class MockDataPage(Resource):
+    def get(self):
+        print("mock")
+
+        user_data = {
+        "full_name": "Test User Restaurant Owner",
+        "email": "testuser@example.com",
+        "phone": "1234567890",
+        "profile_image_url": "http://example.com/image.jpg",
+        "user_type": "admin",
+        "password_hash": "passwordhsh"
+        }
+        user = save_user_account(user_data)
+        user_id = user.get('id')
+        restaurant_data = {
+            "name": "Restaurant Test",
+            "description": "Restaurant Test",
+            "location_address": "Address 1",
+            "location_latitude": "1",
+            "location_longitude": "1",
+            "restaurant_image": "image1",
+            "time_zone": "UTC",
+            "owner_user_id": user_id
+        }
+        restaurant =  add_restaurant(restaurant_data)
+        restr_id = restaurant.get('id')
+        days_of_week = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+        for day in days_of_week:
+            add_working_hours(restaurant_id=restr_id, day_of_week=day, opening_time="09:00", closing_time="21:00")
+        table1 = add_table(table_number="1",restaurant_id=restr_id,number_of_seats=4, table_type="indoor", description="Table 1")
+        table2 = add_table(table_number="2",restaurant_id=restr_id,number_of_seats=4, table_type="indoor", description="Table 2")
+        table_id = json.loads(table1[0]).get('id')
+        reservation_start_time = datetime.now().replace(hour=10, minute=0, second=0, microsecond=0)
+        reservation_end_time = reservation_start_time.replace(hour=10, minute=30)
+        reservation_code = str(int(datetime.timestamp(datetime.now())))[-10:]
+        add_reservation(user_id=user_id, restaurant_id=restr_id, dining_table_id=table_id, number_of_people=4, reservation_code=reservation_code,
+                        reservation_start_time=reservation_start_time, reservation_end_time=reservation_end_time)
+        
+        access_token=request.cookies.get("access_token")
+        user=get_user(access_token)[0]
+        add_coworker_to_restaurant(restr_id, user.get('email'))
+
+
+
+        return make_response("Successfully mocked data", 200)

@@ -18,8 +18,10 @@ from .auth import api as api_auth
 from .layout import api as api_layout
 from.ui import api as api_ui
 from .upload import api as api_upload
+from .coworkers import api as api_coworkers
 
 api.add_namespace(api_auth)
 api.add_namespace(api_layout)
 api.add_namespace(api_ui)
 api.add_namespace(api_upload)
+api.add_namespace(api_coworkers)

@@ -1,4 +1,6 @@
+from decimal import Decimal
 from flask import json
+from data.models.RestaurantOwners import RestaurantOwners
 from data.models.Reservation import Reservation
 from data.models.Restaurant import Restaurant
 from data.models.DiningTable import DiningTable
@@ -194,3 +196,72 @@ def get_pictures(restaurant_id):
     with Session(engine) as session :
         pictures = session.query(RestaurantPictures).filter(RestaurantPictures.restaurant_id == restaurant_id).all()
         return [picture.as_dict() for picture in pictures] if pictures else None
+    
+
+def add_restaurant(restaurant_data: dict):
+    with Session(engine) as session:
+        restaurant = Restaurant(
+            name=restaurant_data['name'],
+            description=restaurant_data.get('description'),
+            location_address=restaurant_data.get('location_address'),
+            location_latitude=Decimal(str(restaurant_data['location_latitude'])),
+            location_longitude=Decimal(str(restaurant_data['location_longitude'])),
+            restaurant_image=restaurant_data.get('restaurant_image'),
+            time_zone=restaurant_data.get('time_zone'),
+            owner_user_id=restaurant_data.get('owner_user_id')
+        )
+        session.add(restaurant)
+        session.commit()
+        return restaurant.as_dict() if restaurant else None
+    
+def add_reservation(user_id,restaurant_id,dining_table_id,number_of_people,reservation_start_time
+                    ,reservation_end_time,reservation_code,special_requests=''):
+    with Session(engine) as session:
+        table = session.get(DiningTable, dining_table_id)
+        if table is None:
+            return None
+        
+        reservation = Reservation(
+            user_id=user_id,
+            restaurant_id=restaurant_id,
+            dining_table_id=dining_table_id,
+            number_of_people=number_of_people,
+            reservation_start_time=reservation_start_time,
+            reservation_end_time=reservation_end_time,
+            status='pending',
+            special_requests=special_requests,
+            reservation_code=reservation_code)
+        session.add(reservation)
+        session.commit()
+        return reservation.as_dict() if reservation else None
+    
+
+def get_restaurant_by_owner(owner_id):
+    with Session(engine) as session:
+        restaurant_ids = session.query(RestaurantOwners.restaurant_id).filter(RestaurantOwners.user_id == owner_id).all()
+        restaurant_ids = [r[0] for r in restaurant_ids]
+        restaurants = session.query(Restaurant).filter(Restaurant.id.in_(restaurant_ids)).all()
+        return [r.as_dict() for r in restaurants] if restaurants else None
+
+def get_coworkers_by_restaurant_id(restaurant_id):
+    with Session(engine) as session:
+        user_ids = session.query(RestaurantOwners).filter(RestaurantOwners.restaurant_id == restaurant_id).all()
+        user_ids = [r.user_id for r in user_ids]
+        users = session.query(UserAccount).filter(UserAccount.id.in_(user_ids)).all()
+        return [r.as_dict() for r in users] if users else None
+
+def add_coworker_to_restaurant(restaurant_id, user_email):
+    with Session(engine) as session:
+        user = session.query(UserAccount).filter(UserAccount.email == user_email).first()
+        restaurant_owner = RestaurantOwners(user_id=user.id, restaurant_id=restaurant_id)
+        session.add(restaurant_owner)
+        session.commit()
+        return restaurant_owner.as_dict() if restaurant_owner else None
+    
+def remove_coworker(restaurant_id, user_id):
+    with Session(engine) as session:
+        restaurant_owner = session.query(RestaurantOwners).filter(RestaurantOwners.restaurant_id == restaurant_id, RestaurantOwners.user_id == user_id).first()
+        session.delete(restaurant_owner)
+        session.commit()
+        return restaurant_owner.as_dict() if restaurant_owner else None
+    
