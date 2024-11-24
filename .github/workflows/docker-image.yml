@@ -2,7 +2,7 @@ name: Upload app image to docker hub
 
 on:
   push:
-    branches: [ "dev", "TABLETOP-60-65" ]
+    branches: [ "dev" ]
 
 permissions:
   contents: read
