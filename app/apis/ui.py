@@ -80,8 +80,13 @@ class ReservationsPage(Resource):
 @api.route("/home")
 class HomePage(Resource):
     def get(self):
-        access_token=request.cookies.get("access_token")
-        user=get_user(access_token)[0]
+        if 'x-amzn-oidc-accesstoken' in request.headers:
+            access_token = request.headers.get('x-amzn-oidc-accesstoken')
+        elif "access_token" in request.cookies:
+            access_token=request.cookies.get("access_token")
+        else:
+            return "You are not logged in", 403
+        user=get_user(access_token)
         if user is None:
             return redirect("/staff/auth/login")
         restaurants = get_restaurant_by_owner(user.get('id'))
@@ -136,8 +141,14 @@ class MockDataPage(Resource):
         add_reservation(user_id=user_id, restaurant_id=restr_id, dining_table_id=table_id, number_of_people=4, reservation_code=reservation_code,
                         reservation_start_time=reservation_start_time, reservation_end_time=reservation_end_time)
         
-        access_token=request.cookies.get("access_token")
-        user=get_user(access_token)[0]
+        if 'x-amzn-oidc-accesstoken' in request.headers:
+            access_token = request.headers.get('x-amzn-oidc-accesstoken')
+        elif "access_token" in request.cookies:
+            access_token=request.cookies.get("access_token")
+        else:
+            return "You are not logged in", 403
+        
+        user=get_user(access_token)
         add_coworker_to_restaurant(restr_id, user.get('email'))
 
 
