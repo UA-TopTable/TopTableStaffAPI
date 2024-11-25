@@ -1,3 +1,4 @@
+from socket import SocketIO
 from flask import Flask,jsonify, redirect, request, session
 from flask_restx import Api
 
@@ -13,4 +14,11 @@ def create_app():
 
     app.secret_key=FLASK_SECRET_KEY
 
-    return app
+    socketio=SocketIO(app)
+
+    return app,socketio
+
+app,socketio=create_app()
+
+if __name__ == "__main__":
+    socketio.run(create_app())
