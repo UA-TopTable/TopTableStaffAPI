@@ -39,9 +39,15 @@ class AddCoworker(Resource):
             data=request.json
             email=data["email"]
             restaurant_id=data["restaurant_id"]
+                
+            if 'x-amzn-oidc-accesstoken' in request.headers:
+                access_token = request.headers.get('x-amzn-oidc-accesstoken')
+            elif "access_token" in request.cookies:
+                access_token=request.cookies.get("access_token")
+            else:
+                return "You are not logged in", 403
 
-            access_token=request.cookies.get("access_token")
-            user=get_user(access_token)[0]
+            user=get_user(access_token)
             if user is None:
                 return "You are not logged in", 403
             restaurants = get_restaurant_by_owner(user.get('id'))
@@ -72,8 +78,14 @@ class RemoveCoworker(Resource):
             restaurant_id=data["restaurant_id"]
             user_id=data["user_id"]
 
-            access_token=request.cookies.get("access_token")
-            user=get_user(access_token)[0]
+            if 'x-amzn-oidc-accesstoken' in request.headers:
+                access_token = request.headers.get('x-amzn-oidc-accesstoken')
+            elif "access_token" in request.cookies:
+                access_token=request.cookies.get("access_token")
+            else:
+                return "You are not logged in", 403
+            
+            user=get_user(access_token)
             if user is None:
                 return "You are not logged in", 403
             restaurants = get_restaurant_by_owner(user.get('id'))
