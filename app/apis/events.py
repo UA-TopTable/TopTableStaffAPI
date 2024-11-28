@@ -2,6 +2,7 @@ import os
 import boto3
 from flask_socketio import SocketIO
 
+from services.email_service import send_reservation_response_email
 from services.db_service import get_all_restaurants_by_owner_email, get_reservation_by_id, update_reservation
 from services.queue_service import poll_queue
 
@@ -37,6 +38,8 @@ def confirm_reservation(data):
     if reservation is not None:
         socketio.emit("reservation_confirmed",{"reservation":reservation.as_dict()})
 
+    send_reservation_response_email("confirmed",sender_email,reservation_id)
+
 
 
 @socketio.on("cancel_reservation")
@@ -49,4 +52,6 @@ def cancel_reservation(data):
 
     if reservation is not None:
         socketio.emit("reservation_cancelled",{"reservation":reservation.as_dict()})
+        
+    send_reservation_response_email("cancelled",sender_email,reservation_id)
         
