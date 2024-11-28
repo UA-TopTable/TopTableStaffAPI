@@ -39,6 +39,12 @@
         <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
       </div>
       <div class="toast-body">
+        <!-- Extra fields that are meant to be hidden-->
+        <input type="hidden" id="reservationId" value="">
+        <input type="hidden" id="senderEmail" value="">
+        <input type="hidden" id="receiptHandle" value="">
+        <input type="hidden" id="restaurantId" value="">
+
         <div class="d-flex flex-column">
           <div class="p-0 d-flex flex-row justify-content-evenly">
             <div class="p-0">
@@ -92,21 +98,48 @@
       console.log(data);
       const toastElement=document.getElementById('liveToast');
       const toast = new bootstrap.Toast(toastElement);
+
       const tableNumberElement = document.getElementById('table number');
       const numberOfPeopleElement = document.getElementById('number people');
       const startTimeElement = document.getElementById('start time');
       const endTimeElement = document.getElementById('end time');
+      const reservationIdHidden=document.getElementById('reservationId');
+      const senderEmail=document.getElementById('senderEmail');
+      const receiptHandle=document.getElementById('receiptHandle');
+      const restaurantId=document.getElementById('restaurantId');
+
       tableNumberElement.innerText = data.table_number;
       numberOfPeopleElement.innerText = data.reservation["number_of_people"];
       startTimeElement.innerText = data.reservation["start_time"];
       endTimeElement.innerText = data.reservation["end_time"];
+      reservationIdHidden.value=data.reservation["id"];
+      senderEmail.value=data.reservation["sender_email"];
+      receiptHandle.value=data.receipt_handle;
+      restaurantId.value=data.restaurant_id;
       toast.show();
     });
-    socket.emit('listen_for_reservation_requests',{"email":"{{email}}"});
 
     socket.on("not authenticated", (data) => {
       console.log("user is not authenticated");
     })
+
+    function acceptReservation() {
+      const reservationId=document.getElementById('reservationId').value;
+      const senderEmail=document.getElementById('senderEmail').value;
+      const receiptHandle=document.getElementById('receiptHandle').value;
+      const restaurantId=document.getElementById('restaurantId').value;
+
+      socket.emit('accept_reservation',{"reservation_id":reservationId,"sender_email":senderEmail,"receipt_handle":receiptHandle,"restaurant_id":restaurantId});
+    }
+
+    function denyReservation() {
+      const reservationId=document.getElementById('reservationId').value;
+      const senderEmail=document.getElementById('senderEmail').value;
+      const receiptHandle=document.getElementById('receiptHandle').value;
+      const restaurantId=document.getElementById('restaurantId').value;
+
+      socket.emit('deny_reservation',{"reservation_id":reservationId,"sender_email":senderEmail,"receipt_handle":receiptHandle,"restaurant_id":restaurantId});
+    }
   </script>
 
   {% block scripts %}{% endblock %}
