@@ -15,8 +15,8 @@ def get_reservation_confirmation(restaurant_id_list,sqs=boto3.client('sqs'),queu
                     return message
 
 
-def delete_reservation_confirmation(message,sqs=boto3.client('sqs'),queue_url=os.getenv("QUEUE_URL")):
+def delete_reservation_confirmation(receipt_handle,sqs=boto3.client('sqs'),queue_url=os.getenv("QUEUE_URL")):
     sqs.delete_message(
         QueueUrl=queue_url,
-        ReceiptHandle=message["ReceiptHandle"]
+        ReceiptHandle=receipt_handle
     )

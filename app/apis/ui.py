@@ -154,3 +154,12 @@ class MockDataPage(Resource):
 
 
         return make_response("Successfully mocked data", 200)
+    
+@api.route("/")
+class Root(Resource):
+    def get(self):
+        return make_response(
+            render_template("base.html"),
+            200,
+            {'Content-Type': 'text/html'}
+        )
