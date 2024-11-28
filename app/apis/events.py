@@ -1,3 +1,4 @@
+import json
 import os
 import boto3
 from flask import request
@@ -36,9 +37,9 @@ def listen_for_confirm_reservations(data):
         reservation_request=get_reservation_confirmation(restaurant_ids)
 
         if reservation_request is not None:
-            reservation=get_reservation_by_id(int(reservation_request["MessageAttributes"]["reservation_id"]["StringValue"]))
+            reservation=get_reservation_by_id(json.loads(reservation_request["Body"].replace("'",'"'))["reservation"]["id"]) #while this might seem dumb, but I want to verify that the reservation is there properly
 
-            if reservation is not None:
+            if reservation is not None and reservation.status=="pending": #make sure the reservation is still pending (not the best concurrency management, but good enough for this use case)
                 socketio.emit('reservation_request',{
                     "restaurant_id":reservation.restaurant_id,
                     "reservation":reservation.as_dict(),

@@ -1,3 +1,4 @@
+import json
 import os
 import boto3
 
@@ -7,11 +8,13 @@ def get_reservation_confirmation(restaurant_id_list,sqs=boto3.client('sqs'),queu
         response=sqs.receive_message(
             QueueUrl=queue_url,
             MaxNumberOfMessages=1,
-            WaitTimeSeconds=30
+            WaitTimeSeconds=10
         )
         if "Messages" in response:
             for message in response["Messages"]:
-                if int(message["MessageAttributes"]["restaurant_id"]["StringValue"]) in restaurant_id_list:
+                body=message["Body"]
+                body=json.loads(body.replace("'",'"'))
+                if "reservation" in body and int(body["reservation"]["restaurant_id"]) in restaurant_id_list:
                     return message
 
 
