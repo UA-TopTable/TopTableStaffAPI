@@ -3,8 +3,10 @@ from string import ascii_letters
 import boto3
 from moto import mock_aws
 import pytest
+import socketio
 
 
+from app import app
 from services.queue_service import delete_reservation_confirmation, get_reservation_confirmation
 from data.models.Reservation import Reservation
 from data.models.DiningTable import DiningTable
@@ -80,7 +82,6 @@ def setup():
         session.commit()
 
 
-
 @pytest.mark.timeout(10) #fails if it takes more than 10s
 @mock_aws
 def test_get_and_delete_from_queue():
@@ -102,5 +103,4 @@ def test_get_and_delete_from_queue():
     assert num_messages_after == 0
 
     sqs.delete_queue(QueueUrl=queue_url)
-
     
