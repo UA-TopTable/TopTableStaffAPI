@@ -83,7 +83,6 @@ setuptools==70.3.0
 simple-websocket==1.1.0
 six==1.16.0
 SQLAlchemy==2.0.36
-sqlalchemy-serializer==1.4.22
 sympy==1.13.3
 typing_extensions==4.12.2
 urllib3==2.2.3
