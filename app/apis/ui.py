@@ -12,7 +12,7 @@ api=Namespace("ui",description="UI-related endpoints")
 class RestaurantPage(Resource):
     def get(self, id):
         access_token=request.cookies.get("access_token")
-        user=get_user(access_token)[0]
+        user=get_user(access_token)
         if user is None:
             return redirect("/staff/auth/login")
         restaurants = get_restaurant_by_owner(user.get('id'))
@@ -46,7 +46,7 @@ class RestaurantPage(Resource):
             return make_response("No tables for this restaurant", 404)
         else:
             return make_response(
-                render_template("manage_restaurant.html", restaurant=restaurant, tables=tables, pictures = pictures, working_hours = working_hours, coworkers = coworkers),
+                render_template("manage_restaurant.html", restaurant=restaurant, tables=tables, pictures = pictures, working_hours = working_hours, coworkers = coworkers,email=user.get('email')),
                 200,
                 {'Content-Type': 'text/html'}
             )
@@ -71,7 +71,7 @@ class ReservationsPage(Resource):
             reservations.append(reservation)
 
         return make_response(
-            render_template("reservations.html", reservations=reservations,restaurant_id=id),
+            render_template("reservations.html", reservations=reservations,restaurant_id=id,email=user.email),
             200,
             {'Content-Type': 'text/html'}
         )
@@ -92,7 +92,7 @@ class HomePage(Resource):
         restaurants = get_restaurant_by_owner(user.get('id'))
 
         return make_response(
-            render_template("index.html", restaurants=restaurants),
+            render_template("index.html", restaurants=restaurants,email=user.get('email')),
             200,
             {'Content-Type': 'text/html'}
         )
