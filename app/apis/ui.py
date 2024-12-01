@@ -41,8 +41,6 @@ class RestaurantPage(Resource):
 
         if restaurant is None:
             return make_response("No restaurant found", 404)
-        if tables is None:
-            return make_response("No tables for this restaurant", 404)
         else:
             return make_response(
                 render_template("manage_restaurant.html", restaurant=restaurant, tables=tables, pictures = pictures, working_hours = working_hours, coworkers = coworkers,email=user.get('email')),
@@ -89,6 +87,8 @@ class HomePage(Resource):
         if user is None:
             return redirect("/staff/auth/login")
         restaurants = get_restaurant_by_owner(user.get('id'))
+        print(f'User ID : {user.get('id')}')
+        print(f'Restaurants of the user : {restaurants}')
 
         return make_response(
             render_template("index.html", restaurants=restaurants,user=user),

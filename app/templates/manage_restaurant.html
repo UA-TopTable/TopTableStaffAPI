@@ -65,7 +65,7 @@
                         </button>
                     </div>
                 {% endif %}
-                <button type="button" class="btn btn-primary ms-3" data-bs-toggle="modal"
+                <button type="button" class="btn btn-primary ms-3" data-bs-toggle="modal" style="max-width: 50%;"
                     data-bs-target="#uploadModal">
                     Add pictures
                 </button>
@@ -73,7 +73,7 @@
             <div class="row mt-4">
                 <h3>{{restaurant.name}}</h3>
                 <p>{{restaurant.description}}</p>
-                <button type="button" class="btn btn-primary ms-3" data-bs-toggle="modal"
+                <button type="button" class="btn btn-primary ms-3" data-bs-toggle="modal" style="max-width: 50%;"
                     data-bs-target="#descriptionModal">
                     Modify description
                 </button>
@@ -126,6 +126,7 @@
                         <b>Number of seats</b>
                         <b>Table type</b>
                     </li>
+                    {% if tables %}
                     {% for table in tables %}
                     <li class="list-group-item" style="
                             display: flex;
@@ -138,6 +139,7 @@
                         <div>{{table.table_type}}</div>
                     </li>
                     {% endfor %}
+                    {% endif %}
                 </ul>
             </div>
             <form id="table_form">

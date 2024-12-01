@@ -224,6 +224,10 @@ def add_restaurant(restaurant_data: dict):
         )
         session.add(restaurant)
         session.commit()
+        
+        restaurantOwner = RestaurantOwners(user_id = restaurant_data.get('owner_user_id'), restaurant_id = restaurant.id)
+        session.add(restaurantOwner)
+        session.commit()
         return restaurant.as_dict() if restaurant else None
     
 def add_reservation(user_id,restaurant_id,dining_table_id,number_of_people,reservation_start_time

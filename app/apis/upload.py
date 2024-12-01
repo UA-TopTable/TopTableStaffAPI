@@ -4,7 +4,7 @@ from botocore.exceptions import NoCredentialsError, PartialCredentialsError
 from flask import Flask, request, jsonify, redirect
 from werkzeug.utils import secure_filename
 from data.db_engine import DATABASE_URL
-from services.db_service import add_picture, modify_description, add_working_hours, get_working_hours, modify_working_hours, delete_picture, get_restaurant_by_owner
+from services.db_service import add_picture, add_restaurant, modify_description, add_working_hours, get_working_hours, modify_working_hours, delete_picture, get_restaurant_by_owner
 from services.auth_service import get_user
 from datetime import datetime
 from string import ascii_letters, digits
@@ -216,3 +216,77 @@ class DeletePicture(Resource):
                 return {"message": "Picture not deleted", "restaurant_id": restaurant_id}, 500
         except Exception as e :
             return 'Error', 500
+        
+
+@api.route('/create_restaurant/')
+class CreateRestaurant(Resource):
+    @api.doc("Create a restaurant")
+    @api.response(200,"Restaurant created")
+    @api.response(403,"You are not logged in")
+    @api.response(500,"Restaurant not created")
+    def post(self):
+        try:
+            if 'x-amzn-oidc-accesstoken' in request.headers:
+                access_token = request.headers.get('x-amzn-oidc-accesstoken')
+            elif "access_token" in request.cookies:
+                access_token=request.cookies.get("access_token")
+            else:
+                return "You are not logged in", 403
+            
+            user=get_user(access_token)
+            if user is None:
+                return "You are not logged in", 403
+
+            data = {}
+            data['name']=request.form['name']
+            data['description']=request.form['description']
+            data['location_address']=request.form['location_address']
+            data['location_latitude']=request.form['location_latitude']
+            data['location_longitude']=request.form['location_longitude']
+            data['owner_user_id']=request.form['owner_user_id']
+            data['time_zone']=request.form['time_zone']
+            restaurant_image = request.files.get('restaurant_image')
+            uploaded_url = []
+
+            if restaurant_image.filename == '':
+                return {"message": "Invalid file name"}, 400
+            
+            filename = secure_filename(restaurant_image.filename)
+
+            _, extension = splitext(filename)
+            filename = generate_random_string(32) + extension
+
+            if filename == '':
+                return {"message": "Invalid file name"}, 400
+            
+            filename = secure_filename(filename)
+
+            try:
+                # Upload de l'image à S3
+                s3_client.upload_fileobj(
+                    restaurant_image,
+                    S3_BUCKET,
+                    filename
+                )
+
+                file_url = f"https://{S3_BUCKET}.s3.{S3_BUCKET}.amazonaws.com/{filename}"
+                uploaded_url.append(file_url)
+
+            except (NoCredentialsError, PartialCredentialsError):
+                return {"message": "Missing credentials"}, 500
+            except Exception as e:
+                return {"message": str(e)}, 500
+
+            data['restaurant_image']=uploaded_url[0]
+            print(data)
+            result = add_restaurant(data)
+
+            if isinstance(result, dict) :
+                restaurant_id = result['id']
+                #Fill in the DB with the new image
+                add_picture(file_url, restaurant_id)
+                return {"message": "Restaurant created", "restaurant_id": result['id']}, 200
+            else : 
+                return {"message": "Restaurant not created"}, 500
+        except Exception as e :
+            return f'Error : {e}', 500
