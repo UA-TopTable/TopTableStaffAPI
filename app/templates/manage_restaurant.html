@@ -14,7 +14,13 @@
                     {% for pic in pictures[1:] %}
                     <div class="col-4 mb-3">
                         <img src="{{ pic.link }}" class="restaurant-page-img img-fluid" alt="{{ pic.link }}">
+                        <button class="btn btn-danger"
+                            onclick="deletePicture('{{pic.link}}')">
+                            <i class="bi bi-trash"></i>
+                        </button>
                     </div>
+                    
+                    
                     {% endfor %}
                 </div>
             </div>
@@ -44,6 +50,12 @@
                     {% if pictures %}
                     <img src="{{ pictures[0].link }}" class="restaurant-page-img img-thumbnail"
                         alt="{{ pictures[0].link }}">
+                    <div>
+                        <button class="btn btn-danger"
+                            onclick="deletePicture('{{pictures[0].link}}')">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
                     <button type="button" class="btn btn-primary ms-3" data-bs-toggle="modal"
                         data-bs-target="#photoModal">
                         Show more pictures
@@ -152,28 +164,31 @@
                     </div>
                 </div>
             </form>
-            <!--
                 <div>
                     <h2 class="mb-4">Working Hours</h2>
-                    <table class="table table-bordered table-striped">
-                        <thead>
-                            <tr>
-                                <th>Day of Week</th>
-                                <th>Opening Time</th>
-                                <th>Closing Time</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for hour in working_hours %}
+                    {% if working_hours %}
+                        <table class="table table-bordered table-striped">
+                            <thead>
                                 <tr>
-                                    <td>{{ hour.day_of_week }}</td>
-                                    <td>{{ hour.opening_time }}</td>
-                                    <td>{{ hour.closing_time }}</td>
-                                    Working hours
+                                    <th>Day of Week</th>
+                                    <th>Opening Time</th>
+                                    <th>Closing Time</th>
                                 </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                
+                                {% for day in working_hours %}
+                                    <tr>
+                                        <td>{{ day.day_of_week }}</td>
+                                        <td>{{ day.opening_time }}</td>
+                                        <td>{{ day.closing_time }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                {% else %}
+                    <h3>No working hours set</h3>
+                {% endif %}
                 </div>
                 <h3>Add working hours</h3>
                 <form id="scheduleForm">
@@ -208,7 +223,6 @@
                     </div>
 
                 </form>
-                -->
         </div>
     </div>
 </div>
@@ -429,13 +443,9 @@
                 }
                 return response.json();
             })
-            .then(data => {
-                document.getElementById('response').innerText = 'Working hours successfully set';
-                console.log("Success")
-            })
+            .then(() => location.reload())
             .catch(error => {
                 document.getElementById('response').innerText = 'Error : ' + error.message;
-                console.log('Error : ' + error.message)
             });
     };
 </script>
@@ -473,11 +483,30 @@
 <script>
     function removeCoworker(restaurant_id, user_id) {
         const data = {
-            restaurant_id: parseInt(restaurant_id),
-            user_id: parseInt(user_id)
+            user_id: parseInt(user_id) //Change the parseInt by the correct function
         };
 
-        fetch("/staff/api/v1/coworkers/remove_coworker", {
+        fetch("/staff/upload/delete_picture/", {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+        })
+            .then(response => response.json())
+            .then(data => console.log(data))
+            .then(() => location.reload())
+            .catch(error => console.error('Error:', error));
+    }
+</script>
+
+<script>
+    function deletePicture(link) {
+        const data = {
+            link: link
+        };
+
+        fetch(`/staff/api/v1/upload/delete_picture/${restaurantId}`, {
             method: "DELETE",
             headers: {
                 "Content-Type": "application/json",

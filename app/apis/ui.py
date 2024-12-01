@@ -37,7 +37,6 @@ class RestaurantPage(Resource):
                         Params={'Bucket': bucket_name, 'Key': object_key},
                         ExpiresIn=3600 
                 )
-                print(signed_url)
                 picture['link'] = signed_url
 
         if restaurant is None:
@@ -85,14 +84,14 @@ class HomePage(Resource):
         elif "access_token" in request.cookies:
             access_token=request.cookies.get("access_token")
         else:
-            return "You are not logged in", 403
+            return redirect("/staff/auth/login")
         user=get_user(access_token)
         if user is None:
             return redirect("/staff/auth/login")
         restaurants = get_restaurant_by_owner(user.get('id'))
 
         return make_response(
-            render_template("index.html", restaurants=restaurants,email=user.get('email')),
+            render_template("index.html", restaurants=restaurants,user=user),
             200,
             {'Content-Type': 'text/html'}
         )

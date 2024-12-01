@@ -1,10 +1,11 @@
 import boto3
 from flask_restx import Namespace, Resource, fields, Api
 from botocore.exceptions import NoCredentialsError, PartialCredentialsError
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, redirect
 from werkzeug.utils import secure_filename
 from data.db_engine import DATABASE_URL
-from services.db_service import add_picture, modify_description, add_working_hours, get_working_hours, modify_working_hours
+from services.db_service import add_picture, modify_description, add_working_hours, get_working_hours, modify_working_hours, delete_picture, get_restaurant_by_owner
+from services.auth_service import get_user
 from datetime import datetime
 from string import ascii_letters, digits
 from random import choice
@@ -41,6 +42,22 @@ class ImageUpload(Resource):
         
         files = request.files.getlist('files[]')
         uploaded_url = []
+        try :
+            if 'x-amzn-oidc-accesstoken' in request.headers:
+                access_token = request.headers.get('x-amzn-oidc-accesstoken')
+            elif "access_token" in request.cookies:
+                access_token=request.cookies.get("access_token")
+            else:
+                return "You are not logged in", 403
+            
+            user=get_user(access_token)
+            if user is None:
+                return "You are not logged in", 403
+            restaurants = get_restaurant_by_owner(user.get('id'))
+            if restaurants is None or int(restaurant_id) not in [restaurant.get('id') for restaurant in restaurants]:
+                return "You are not the owner of this restaurant", 403
+        except : 
+            return  'Error checking for the authentication of the user', 500
 
         for file in files :
             if file.filename == '':
@@ -88,6 +105,21 @@ class DescriptionUpload(Resource):
         if not description : 
             return {"message": "No description given"}, 400
         try:
+
+            if 'x-amzn-oidc-accesstoken' in request.headers:
+                access_token = request.headers.get('x-amzn-oidc-accesstoken')
+            elif "access_token" in request.cookies:
+                access_token=request.cookies.get("access_token")
+            else:
+                return "You are not logged in", 403
+            
+            user=get_user(access_token)
+            if user is None:
+                return "You are not logged in", 403
+            restaurants = get_restaurant_by_owner(user.get('id'))
+            if restaurants is None or int(restaurant_id) not in [restaurant.get('id') for restaurant in restaurants]:
+                return "You are not the owner of this restaurant", 403
+
             #Modify the DB with the new description
             returnedValue = modify_description(description, restaurant_id)
             if returnedValue is None :
@@ -100,7 +132,7 @@ class DescriptionUpload(Resource):
 
 
 @api.route('/upload_working_hours/<int:restaurant_id>')
-class DescriptionUpload(Resource):
+class WorkingHoursUpload(Resource):
     @api.doc("upload working hours")
     @api.expect({
         "day":fields.String(required=True),
@@ -120,17 +152,59 @@ class DescriptionUpload(Resource):
             return {"message": str(e)}, 500
         
         try:
+            if 'x-amzn-oidc-accesstoken' in request.headers:
+                access_token = request.headers.get('x-amzn-oidc-accesstoken')
+            elif "access_token" in request.cookies:
+                access_token=request.cookies.get("access_token")
+            else:
+                return "You are not logged in", 403
+            
+            user=get_user(access_token)
+            if user is None:
+                return "You are not logged in", 403
+            restaurants = get_restaurant_by_owner(user.get('id'))
+            if restaurants is None or int(restaurant_id) not in [restaurant.get('id') for restaurant in restaurants]:
+                return "You are not the owner of this restaurant", 403
+            
             #Modify the DB with the new description
             if get_working_hours(restaurant_id, day) is not None :
                 returned = modify_working_hours(restaurant_id, day, start, end)
                 if returned == None:
                     return {"message": "Not working"}, 500
-                if not isinstance(returned, dict):
-                    return returned
-                return {"message": "Working hours already existing", "restaurant_id": restaurant_id}, 400
+                else :
+                    print(get_working_hours(restaurant_id, day).opening_time)
+                    return {"message": "Working hours successfully set", "restaurant_id": restaurant_id}, 200
             else :
                 returned = add_working_hours(restaurant_id, day, start, end)
                 return {"message": "Working hours successfully set", "restaurant_id": restaurant_id}, 200
         except Exception as e:
             return {"message": str(e)}, 500
         
+api.route('/delete_picture/<int:restaurant_id>')
+class DeleteImage(Resource):
+    def delete(self, restaurant_id):
+        try:
+            if 'x-amzn-oidc-accesstoken' in request.headers:
+                access_token = request.headers.get('x-amzn-oidc-accesstoken')
+            elif "access_token" in request.cookies:
+                access_token=request.cookies.get("access_token")
+            else:
+                return "You are not logged in", 403
+            
+            user=get_user(access_token)
+            if user is None:
+                return "You are not logged in", 403
+            restaurants = get_restaurant_by_owner(user.get('id'))
+            if restaurants is None or int(restaurant_id) not in [restaurant.get('id') for restaurant in restaurants]:
+                return "You are not the owner of this restaurant", 403
+            
+
+            data = request.json
+            link = data['link']
+            result = delete_picture(link, restaurant_id)
+            if result == True :
+                return 
+            else : 
+                return 
+        except Exception as e :
+            return 'Error', 500

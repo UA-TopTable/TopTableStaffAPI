@@ -9,7 +9,7 @@ from data.models.RestaurantPictures import RestaurantPictures
 from data.models.WorkingHours import WorkingHours
 from sqlalchemy.orm import Session,make_transient
 from data.db_engine import engine
-from sqlalchemy.orm.exc import NoResultFound
+from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound 
 from datetime import datetime
 
 
@@ -122,8 +122,10 @@ def get_working_hours(restaurant_id, day_of_week):
         else : 
             with Session(engine) as session:
                 working_hours = session.query(WorkingHours).filter(WorkingHours.restaurant_id==restaurant_id).all()  
-            return [w.as_dict() for w in working_hours] if working_hours else working_hours,200  
+            return [w.as_dict() for w in working_hours] if working_hours else None
     except NoResultFound:
+        return None
+    except MultipleResultsFound :
         return None
 
 def add_working_hours(restaurant_id,day_of_week,opening_time,closing_time):
@@ -144,6 +146,7 @@ def modify_working_hours(restaurant_id, day_of_week,opening_time,closing_time):
     if working_hours is None :
         return "Not found in the DB", 500
     with Session(engine) as session:
+        working_hours = session.merge(working_hours)
         working_hours.opening_time = opening_time
         working_hours.closing_time = closing_time
         session.commit()
@@ -196,7 +199,16 @@ def get_pictures(restaurant_id):
     with Session(engine) as session :
         pictures = session.query(RestaurantPictures).filter(RestaurantPictures.restaurant_id == restaurant_id).all()
         return [picture.as_dict() for picture in pictures] if pictures else None
-    
+
+def delete_picture(picture_link, restaurant_id):
+    with Session(engine) as session :
+        try :
+            picture = session.query(RestaurantPictures).filter(RestaurantPictures.restaurant_id == restaurant_id, RestaurantPictures.link == picture_link).one()
+        except :
+            return False
+        session.delete(picture)
+        session.commit()
+        return True
 
 def add_restaurant(restaurant_data: dict):
     with Session(engine) as session:
