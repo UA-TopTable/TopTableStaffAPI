@@ -43,7 +43,7 @@
 <div class="row mt-5"></div>
 <div class="container mt-5">
     <div class="row">
-        <div class="col-6">
+        <div class="col-9">
             <div id="response" style="display: none;" class="alert alert-info"></div>
             <div class="row">
                 <div class="d-flex align-items-center">
@@ -483,10 +483,11 @@
 <script>
     function removeCoworker(restaurant_id, user_id) {
         const data = {
-            user_id: parseInt(user_id) //Change the parseInt by the correct function
+            restaurant_id: parseInt(restaurant_id),
+            user_id: parseInt(user_id)
         };
 
-        fetch("/staff/upload/delete_picture/", {
+        fetch("/staff/api/v1/coworkers/remove_coworker", {
             method: "DELETE",
             headers: {
                 "Content-Type": "application/json",

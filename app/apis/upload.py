@@ -203,8 +203,8 @@ class DeleteImage(Resource):
             picture_id = data['picture_id']
             result = delete_picture(picture_id, restaurant_id)
             if result == True :
-                return 
+                return 'Picture deleted', 200
             else : 
-                return 
+                return 'Picture not deleted', 500
         except Exception as e :
             return 'Error', 500
