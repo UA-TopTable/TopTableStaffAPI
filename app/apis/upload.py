@@ -182,6 +182,14 @@ class WorkingHoursUpload(Resource):
         
 api.route('/delete_picture/<int:restaurant_id>')
 class DeleteImage(Resource):
+    @api.doc("upload a picture")
+    @api.expect({
+        "picture_id":fields.Integer(required=True)
+    })
+    @api.response(200,"Picture deleted")
+    @api.response(403,"You are not logged in")
+    @api.response(403,"You are not the owner of this restaurant")
+    @api.response(500,"Picture not deleted")
     def delete(self, restaurant_id):
         try:
             if 'x-amzn-oidc-accesstoken' in request.headers:

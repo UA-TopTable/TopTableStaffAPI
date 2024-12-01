@@ -420,8 +420,7 @@
         event.preventDefault();
 
         const pathArray = window.location.pathname.split('/');
-        const restaurantId = pathArray[pathArray.length - 1]; // récupère le dernier élément du chemin
-        console.log(restaurantId);
+        const restaurantId = pathArray[pathArray.length - 1]; 
 
         const dayInput = document.getElementById('day');
         const startInput = document.getElementById('start');
@@ -431,8 +430,6 @@
         formData.append('day', dayInput.value);
         formData.append('start', startInput.value);
         formData.append('end', endInput.value);
-
-        console.log("Data sent");
 
         fetch(`/staff/api/v1/upload/upload_working_hours/${restaurantId}`, {
             method: 'POST',
@@ -509,7 +506,7 @@
         const data = {
             picture_id: parseInt(picture_id)
         };
-
+        console.log(restaurantId)
         fetch(`/staff/api/v1/upload/delete_picture/${restaurantId}`, {
             method: "DELETE",
             headers: {
