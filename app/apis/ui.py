@@ -87,22 +87,23 @@ class HomePage(Resource):
         if user is None:
             return redirect("/staff/auth/login")
         restaurants = get_restaurant_by_owner(user.get('id'))
-        picture = restaurants.get('restaurant_image')
-        try :
-            if not (picture == '' or picture is None):
-                parsed_url = urlparse(picture)
-                
-                bucket_name = parsed_url.netloc.split('.')[0]
-                object_key = parsed_url.path.lstrip('/')
-                s3_client = boto3.client('s3')
-                signed_url = s3_client.generate_presigned_url(
-                        'get_object',
-                        Params={'Bucket': bucket_name, 'Key': object_key},
-                        ExpiresIn=3600 
-                )
-                restaurants['restaurant_image'] = signed_url
-        except : 
-            restaurants['restaurant_image'] = 'Unable to fetch the image link'
+        for restaurant in restaurants :
+            picture = restaurant.get('restaurant_image')
+            try :
+                if not (picture == '' or picture is None):
+                    parsed_url = urlparse(picture)
+                    
+                    bucket_name = parsed_url.netloc.split('.')[0]
+                    object_key = parsed_url.path.lstrip('/')
+                    s3_client = boto3.client('s3')
+                    signed_url = s3_client.generate_presigned_url(
+                            'get_object',
+                            Params={'Bucket': bucket_name, 'Key': object_key},
+                            ExpiresIn=3600 
+                    )
+                    restaurant['restaurant_image'] = signed_url
+            except : 
+                restaurant['restaurant_image'] = 'Unable to fetch the image link'
         return make_response(
             render_template("index.html", restaurants=restaurants,user=user),
             200,
