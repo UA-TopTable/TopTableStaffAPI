@@ -180,8 +180,8 @@ class WorkingHoursUpload(Resource):
         except Exception as e:
             return {"message": str(e)}, 500
         
-api.route('/delete_picture/<int:restaurant_id>')
-class DeleteImage(Resource):
+@api.route('/delete_picture/<int:restaurant_id>')
+class DeletePicture(Resource):
     @api.doc("upload a picture")
     @api.expect({
         "picture_id":fields.Integer(required=True)

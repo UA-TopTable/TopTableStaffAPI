@@ -30,6 +30,7 @@ def create_app():
 app=create_app()
 mail=Mail(app)
 socketio = SocketIO(app)
+print(app.url_map)
 
 if __name__ == "__main__":
     socketio.run(app)
