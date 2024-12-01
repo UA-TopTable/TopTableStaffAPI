@@ -502,6 +502,7 @@
 
 <script>
     function deletePicture(picture_id) {
+        const pathArray = window.location.pathname.split('/');
         const restaurantId = pathArray[pathArray.length - 1];
         const data = {
             picture_id: parseInt(picture_id)
