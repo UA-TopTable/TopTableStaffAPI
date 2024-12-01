@@ -14,7 +14,13 @@
                     {% for pic in pictures[1:] %}
                     <div class="col-4 mb-3">
                         <img src="{{ pic.link }}" class="restaurant-page-img img-fluid" alt="{{ pic.link }}">
+                        <button class="btn btn-danger"
+                            onclick="deletePicture('{{pic.id}}')">
+                            <i class="bi bi-trash"></i>
+                        </button>
                     </div>
+                    
+                    
                     {% endfor %}
                 </div>
             </div>
@@ -37,7 +43,7 @@
 <div class="row mt-5"></div>
 <div class="container mt-5">
     <div class="row">
-        <div class="col">
+        <div class="col-9">
             <div id="response" style="display: none;" class="alert alert-info"></div>
             <div class="row">
                 <div class="d-flex align-items-center">
@@ -49,11 +55,18 @@
                         Show more pictures
                     </button>
                     {% endif %}
-                    <button type="button" class="btn btn-primary ms-3" data-bs-toggle="modal"
-                        data-bs-target="#uploadModal">
-                        Add pictures
+                </div>
+            </div>
+                <div class="row"><div>
+                    <button class="btn btn-danger"
+                        onclick="deletePicture('{{pictures[0].id}}')">
+                        <i class="bi bi-trash"></i>
                     </button>
                 </div>
+                <button type="button" class="btn btn-primary ms-3" data-bs-toggle="modal"
+                    data-bs-target="#uploadModal">
+                    Add pictures
+                </button>
             </div>
             <div class="row mt-4">
                 <h3>{{restaurant.name}}</h3>
@@ -97,7 +110,6 @@
                 </ul>
             </div>
         </div>
-        <div class="col-1"></div>
         <div class="col">
             <div class="list-container">
                 <ul class="list-group mx-2" id="tables_list">
@@ -152,28 +164,31 @@
                     </div>
                 </div>
             </form>
-            <!--
                 <div>
                     <h2 class="mb-4">Working Hours</h2>
-                    <table class="table table-bordered table-striped">
-                        <thead>
-                            <tr>
-                                <th>Day of Week</th>
-                                <th>Opening Time</th>
-                                <th>Closing Time</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for hour in working_hours %}
+                    {% if working_hours %}
+                        <table class="table table-bordered table-striped">
+                            <thead>
                                 <tr>
-                                    <td>{{ hour.day_of_week }}</td>
-                                    <td>{{ hour.opening_time }}</td>
-                                    <td>{{ hour.closing_time }}</td>
-                                    Working hours
+                                    <th>Day of Week</th>
+                                    <th>Opening Time</th>
+                                    <th>Closing Time</th>
                                 </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                
+                                {% for day in working_hours %}
+                                    <tr>
+                                        <td>{{ day.day_of_week }}</td>
+                                        <td>{{ day.opening_time }}</td>
+                                        <td>{{ day.closing_time }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                {% else %}
+                    <h3>No working hours set</h3>
+                {% endif %}
                 </div>
                 <h3>Add working hours</h3>
                 <form id="scheduleForm">
@@ -208,7 +223,6 @@
                     </div>
 
                 </form>
-                -->
         </div>
     </div>
 </div>
@@ -429,13 +443,9 @@
                 }
                 return response.json();
             })
-            .then(data => {
-                document.getElementById('response').innerText = 'Working hours successfully set';
-                console.log("Success")
-            })
+            .then(() => location.reload())
             .catch(error => {
                 document.getElementById('response').innerText = 'Error : ' + error.message;
-                console.log('Error : ' + error.message)
             });
     };
 </script>
@@ -478,6 +488,28 @@
         };
 
         fetch("/staff/api/v1/coworkers/remove_coworker", {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+        })
+            .then(response => response.json())
+            .then(data => console.log(data))
+            .then(() => location.reload())
+            .catch(error => console.error('Error:', error));
+    }
+</script>
+
+<script>
+    function deletePicture(picture_id) {
+        const pathArray = window.location.pathname.split('/');
+        const restaurantId = pathArray[pathArray.length - 1];
+        const data = {
+            picture_id: parseInt(picture_id)
+        };
+
+        fetch(`/staff/api/v1/upload/delete_picture/${restaurantId}`, {
             method: "DELETE",
             headers: {
                 "Content-Type": "application/json",

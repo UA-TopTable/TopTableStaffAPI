@@ -15,7 +15,7 @@ class Login(Resource):
 class SignOut(Resource):
     @api.doc("sign out")
     @api.response(301,"redirecting to home page")
-    def post(self):
+    def get(self):
         resp=redirect("/staff/ui/home") #TODO: change to restaurant home page (when we have one)
         resp.delete_cookie("access_token")
         return resp
