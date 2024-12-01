@@ -4,7 +4,7 @@ from botocore.exceptions import NoCredentialsError, PartialCredentialsError
 from flask import Flask, request, jsonify, redirect
 from werkzeug.utils import secure_filename
 from data.db_engine import DATABASE_URL
-from services.db_service import add_picture, add_restaurant, modify_description, add_working_hours, get_working_hours, modify_working_hours, delete_picture, get_restaurant_by_owner
+from services.db_service import add_picture, get_picture_by_id, add_restaurant, modify_description, add_working_hours, get_working_hours, modify_working_hours, delete_picture, get_restaurant_by_owner
 from services.auth_service import get_user
 from datetime import datetime
 from string import ascii_letters, digits
@@ -18,6 +18,7 @@ AWS_REGION="us-east-1"
 api=Namespace("upload", path="/api/v1/upload", description="Operations to upload pictures and description of the restaurant")
 
 s3_client = boto3.client('s3', region_name=AWS_REGION)
+s3_delete = boto3.resource('s3', region_name=AWS_REGION)
 
 def generate_random_string(length):
     # choose from all lowercase letter
@@ -205,17 +206,21 @@ class DeletePicture(Resource):
             restaurants = get_restaurant_by_owner(user.get('id'))
             if restaurants is None or int(restaurant_id) not in [restaurant.get('id') for restaurant in restaurants]:
                 return "You are not the owner of this restaurant", 403
-            
 
             data = request.json
             picture_id = data['picture_id']
+            picture = get_picture_by_id(picture_id)
             result = delete_picture(picture_id, restaurant_id)
+            try :
+                s3_delete.Object(bucket_name = S3_BUCKET, key = picture['link'])
+            except Exception as e :
+                return 
             if result == True :
                 return {"message": "Picture deleted", "restaurant_id": restaurant_id}, 200
             else : 
                 return {"message": "Picture not deleted", "restaurant_id": restaurant_id}, 500
         except Exception as e :
-            return 'Error', 500
+            return {"message": 'Error : ' + str(e)}, 500
         
 
 @api.route('/create_restaurant/')

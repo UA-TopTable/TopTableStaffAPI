@@ -200,6 +200,14 @@ def get_pictures(restaurant_id):
         pictures = session.query(RestaurantPictures).filter(RestaurantPictures.restaurant_id == restaurant_id).all()
         return [picture.as_dict() for picture in pictures] if pictures else None
 
+def get_picture_by_id(picture_id):
+    try :
+        with Session(engine) as session :
+            pictures = session.query(RestaurantPictures).filter(RestaurantPictures.id == picture_id).one()
+            return [picture.as_dict() for picture in pictures] if pictures else None
+    except :
+        return None
+
 def delete_picture(picture_id, restaurant_id):
     with Session(engine) as session :
         try :
@@ -224,7 +232,7 @@ def add_restaurant(restaurant_data: dict):
         )
         session.add(restaurant)
         session.commit()
-        
+
         restaurantOwner = RestaurantOwners(user_id = restaurant_data.get('owner_user_id'), restaurant_id = restaurant.id)
         session.add(restaurantOwner)
         session.commit()
