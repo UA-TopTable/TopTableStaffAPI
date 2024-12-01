@@ -15,7 +15,7 @@
                     <div class="col-4 mb-3">
                         <img src="{{ pic.link }}" class="restaurant-page-img img-fluid" alt="{{ pic.link }}">
                         <button class="btn btn-danger"
-                            onclick="deletePicture('{{pic.link}}')">
+                            onclick="deletePicture('{{pic.id}}')">
                             <i class="bi bi-trash"></i>
                         </button>
                     </div>
@@ -43,29 +43,30 @@
 <div class="row mt-5"></div>
 <div class="container mt-5">
     <div class="row">
-        <div class="col">
+        <div class="col-6">
             <div id="response" style="display: none;" class="alert alert-info"></div>
             <div class="row">
                 <div class="d-flex align-items-center">
                     {% if pictures %}
                     <img src="{{ pictures[0].link }}" class="restaurant-page-img img-thumbnail"
                         alt="{{ pictures[0].link }}">
-                    <div>
-                        <button class="btn btn-danger"
-                            onclick="deletePicture('{{pictures[0].link}}')">
-                            <i class="bi bi-trash"></i>
-                        </button>
-                    </div>
                     <button type="button" class="btn btn-primary ms-3" data-bs-toggle="modal"
                         data-bs-target="#photoModal">
                         Show more pictures
                     </button>
                     {% endif %}
-                    <button type="button" class="btn btn-primary ms-3" data-bs-toggle="modal"
-                        data-bs-target="#uploadModal">
-                        Add pictures
+                </div>
+            </div>
+                <div class="row"><div>
+                    <button class="btn btn-danger"
+                        onclick="deletePicture('{{pictures[0].id}}')">
+                        <i class="bi bi-trash"></i>
                     </button>
                 </div>
+                <button type="button" class="btn btn-primary ms-3" data-bs-toggle="modal"
+                    data-bs-target="#uploadModal">
+                    Add pictures
+                </button>
             </div>
             <div class="row mt-4">
                 <h3>{{restaurant.name}}</h3>
@@ -501,9 +502,10 @@
 </script>
 
 <script>
-    function deletePicture(link) {
+    function deletePicture(picture_id) {
+        const restaurantId = pathArray[pathArray.length - 1];
         const data = {
-            link: link
+            picture_id: parseInt(picture_id)
         };
 
         fetch(`/staff/api/v1/upload/delete_picture/${restaurantId}`, {

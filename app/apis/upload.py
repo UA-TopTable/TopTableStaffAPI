@@ -200,8 +200,8 @@ class DeleteImage(Resource):
             
 
             data = request.json
-            link = data['link']
-            result = delete_picture(link, restaurant_id)
+            picture_id = data['picture_id']
+            result = delete_picture(picture_id, restaurant_id)
             if result == True :
                 return 
             else : 

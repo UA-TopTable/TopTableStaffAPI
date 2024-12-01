@@ -200,10 +200,10 @@ def get_pictures(restaurant_id):
         pictures = session.query(RestaurantPictures).filter(RestaurantPictures.restaurant_id == restaurant_id).all()
         return [picture.as_dict() for picture in pictures] if pictures else None
 
-def delete_picture(picture_link, restaurant_id):
+def delete_picture(picture_id, restaurant_id):
     with Session(engine) as session :
         try :
-            picture = session.query(RestaurantPictures).filter(RestaurantPictures.restaurant_id == restaurant_id, RestaurantPictures.link == picture_link).one()
+            picture = session.query(RestaurantPictures).filter(RestaurantPictures.restaurant_id == restaurant_id, RestaurantPictures.id == picture_id).one()
         except :
             return False
         session.delete(picture)
