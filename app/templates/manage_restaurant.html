@@ -45,30 +45,30 @@
     <div class="row">
         <div class="col">
             <div id="response" style="display: none;" class="alert alert-info"></div>
-            {% if pictures %}
-                <div class="row">
-                    <div class="d-flex align-items-center">
-                            <img src="{{ pictures[0].link }}" style="max-width: 80%;" class="restaurant-page-img img-thumbnail"
-                                alt="{{ pictures[0].link }}">
-                            <button type="button" class="btn btn-primary ms-3" data-bs-toggle="modal"
-                                data-bs-target="#photoModal">
-                                Show more pictures
-                            </button>
-                    </div>
-                </div>
-            {% endif %}
                 {% if pictures %}
-                    <div class="row"><div>
-                        <button class="btn btn-danger"
-                            onclick="deletePicture('{{pictures[0].id}}')">
-                            <i class="bi bi-trash"></i>
-                        </button>
+                    <div class="row">
+                        <div class="d-flex align-items-center">
+                                <img src="{{ pictures[0].link }}" style="max-width: 80%;" class="restaurant-page-img img-thumbnail"
+                                    alt="{{ pictures[0].link }}">
+                                <button type="button" class="btn btn-primary ms-3" data-bs-toggle="modal"
+                                    data-bs-target="#photoModal">
+                                    Show more pictures
+                                </button>
+                        </div>
                     </div>
                 {% endif %}
-                <button type="button" class="btn btn-primary ms-3" data-bs-toggle="modal" style="max-width: 50%;"
-                    data-bs-target="#uploadModal">
-                    Add pictures
-                </button>
+                <div class="row"><div></div>
+                    {% if pictures %}
+                            <button class="btn btn-danger"
+                                onclick="deletePicture('{{pictures[0].id}}')">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                    {% endif %}
+                    <button type="button" class="btn btn-primary ms-3" data-bs-toggle="modal" style="max-width: 50%;"
+                        data-bs-target="#uploadModal">
+                        Add pictures
+                    </button>
+                </div>
             </div>
             <div class="row mt-4">
                 <h3>{{restaurant.name}}</h3>
