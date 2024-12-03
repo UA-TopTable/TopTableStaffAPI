@@ -57,6 +57,12 @@
                       <input type="text" id="location_address" name="location_address" maxlength="255" class="form-control">
                   </div>
 
+                  <div class="row form-group mb-3">
+                      <label for="food_category" class="h6">Food category:</label>
+                      <select name="food_category" id="food_category" style="height: 30px;">
+                      </select>
+                  </div>
+
                   <!-- Location Latitude -->
                   <div class="row form-group mb-3">
                       <label for="location_latitude" class="h6">Location Latitude:</label>
@@ -124,6 +130,7 @@
                 <h5 class="card-title">{{ restaurant.name }}</h5>
                 <p class="card-text">{{ restaurant.description }}</p>
                 <p class="card-text">{{ restaurant.address }}</p>
+                <p class="card-text">{{ restaurant.food_category.value }}</p>
                 <a href="/staff/ui/restaurant/{{ restaurant.id }}" class="btn btn-primary">Manage restaurant</a>
               </div>
             </div>
@@ -156,6 +163,7 @@
     const locationLongitude = document.getElementById('location_longitude').value;
     const timeZone = document.getElementById('time_zone').value;
     const restaurantImage = document.getElementById('restaurant_image').files[0];
+    const foodCategory = document.getElementById('food_category').value;
 
     // Ajouter les informations du formulaire à FormData
     formData.append('name', name);
@@ -165,6 +173,7 @@
     formData.append('location_longitude', locationLongitude);
     formData.append('time_zone', timeZone);
     formData.append('restaurant_image', restaurantImage);
+    formData.append('food_category', foodCategory);
 
     // Ajouter un ID utilisateur caché si nécessaire (si vous gérez l'ID de l'utilisateur)
     const ownerUserId = document.getElementById('owner_user_id').value;
@@ -192,6 +201,28 @@
     .catch(error => {
         console.error('There was an error:', error.message);
     });
+  });
+</script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const foodCategorySelect = document.getElementById("food_category");
+
+    // Appeler l'API pour récupérer les catégories
+    fetch("/staff/api/v1/restaurant/food_categories")
+      .then(response => response.json())
+      .then(data => {
+        const categories = data.categories;
+
+        // Ajouter chaque catégorie comme option
+        categories.forEach(category => {
+          const option = document.createElement("option");
+          option.value = category;
+          option.textContent = category;
+          foodCategorySelect.appendChild(option);
+        });
+      })
+      .catch(error => console.error("Error fetching food categories:", error));
   });
 </script>
 

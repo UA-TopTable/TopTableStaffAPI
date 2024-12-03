@@ -77,6 +77,15 @@
                     Modify description
                 </button>
                 <p>{{restaurant.location_address}}</p>
+                <div class="col">
+                    <select name="food_category" id="food_category" style="height: 30px;" class="w-75">
+                        <option value="{{restaurant.food_category}}">{{restaurant.food_category.value}}</option>
+                        <hr/>
+                    </select>
+                    <button type="button" class="btn btn-primary ms-3" id="editCategory">
+                        Edit
+                    </button>
+                </div>
             </div>
             <div class="row mt-4">
                 <h3>Coworkers : </h3>
@@ -531,6 +540,59 @@
     }
 </script>
 
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const foodCategorySelect = document.getElementById("food_category");
+  
+      // Appeler l'API pour récupérer les catégories
+      fetch("/staff/api/v1/restaurant/food_categories")
+        .then(response => response.json())
+        .then(data => {
+          const categories = data.categories;
+  
+          // Ajouter chaque catégorie comme option
+          categories.forEach(category => {
+            const option = document.createElement("option");
+            option.value = category;
+            option.textContent = category;
+            foodCategorySelect.appendChild(option);
+          });
+        })
+        .catch(error => console.error("Error fetching food categories:", error));
+    });
+  </script>
+
+<script>
+    document.getElementById('editCategory').addEventListener('click', function () {
+        const foodCategorySelect = document.getElementById("food_category");
+
+        const pathArray = window.location.pathname.split('/');
+        const restaurantId = pathArray[pathArray.length - 1]; // récupère le dernier élément du chemin
+
+        fetch(`/staff/api/v1/upload/edit_food_category/${restaurantId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                food_category: foodCategorySelect.value
+            })
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(response.status);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Category successfully modified');
+                location.reload();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    });
+</script>
 
 {% endblock %}
 

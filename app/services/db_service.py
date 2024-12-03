@@ -228,7 +228,8 @@ def add_restaurant(restaurant_data: dict):
             location_longitude=Decimal(str(restaurant_data['location_longitude'])),
             restaurant_image=restaurant_data.get('restaurant_image'),
             time_zone=restaurant_data.get('time_zone'),
-            owner_user_id=restaurant_data.get('owner_user_id')
+            owner_user_id=restaurant_data.get('owner_user_id'),
+            food_category=restaurant_data.get('food_category')
         )
         session.add(restaurant)
         session.commit()
@@ -303,3 +304,9 @@ def get_reservation_by_id(reservation_id):
         reservation = session.query(Reservation).filter(Reservation.id == reservation_id).first()
         return reservation.as_dict() if reservation else None
     
+def edit_food_category(food_category, restaurant_id):
+    with Session(engine) as session:
+        restaurant = session.query(Restaurant).filter(Restaurant.id == restaurant_id).first()
+        restaurant.food_category = food_category
+        session.commit()
+        return restaurant.as_dict() if restaurant else None
