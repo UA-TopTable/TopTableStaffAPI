@@ -14,13 +14,12 @@
                     {% for pic in pictures[1:] %}
                     <div class="col-4 mb-3">
                         <img src="{{ pic.link }}" class="restaurant-page-img img-fluid" alt="{{ pic.link }}">
-                        <button class="btn btn-danger"
-                            onclick="deletePicture('{{pic.id}}')">
+                        <button class="btn btn-danger" onclick="deletePicture('{{pic.id}}')">
                             <i class="bi bi-trash"></i>
                         </button>
                     </div>
-                    
-                    
+
+
                     {% endfor %}
                 </div>
             </div>
@@ -45,24 +44,24 @@
     <div class="row">
         <div class="col">
             <div id="response" style="display: none;" class="alert alert-info"></div>
-                {% if pictures %}
-                    <div class="row">
-                        <div class="d-flex align-items-center">
-                                <img src="{{ pictures[0].link }}" style="max-width: 80%;" class="restaurant-page-img img-thumbnail"
-                                    alt="{{ pictures[0].link }}">
-                                <button type="button" class="btn btn-primary ms-3" data-bs-toggle="modal"
-                                    data-bs-target="#photoModal">
-                                    Show more pictures
-                                </button>
-                        </div>
-                    </div>
-                {% endif %}
-                <div class="row"><div></div>
+            {% if pictures %}
+            <div class="row">
+                <div class="d-flex align-items-center">
+                    <img src="{{ pictures[0].link }}" style="max-width: 80%;" class="restaurant-page-img img-thumbnail"
+                        alt="{{ pictures[0].link }}">
+                    <button type="button" class="btn btn-primary ms-3" data-bs-toggle="modal"
+                        data-bs-target="#photoModal">
+                        Show more pictures
+                    </button>
+                </div>
+            </div>
+            {% endif %}
+            <div class="row mt-3">
+                <div>
                     {% if pictures %}
-                            <button class="btn btn-danger"
-                                onclick="deletePicture('{{pictures[0].id}}')">
-                                <i class="bi bi-trash"></i>
-                            </button>
+                    <button class="btn btn-danger" onclick="deletePicture('{{pictures[0].id}}')">
+                        <i class="bi bi-trash"></i>
+                    </button>
                     {% endif %}
                     <button type="button" class="btn btn-primary ms-3" data-bs-toggle="modal" style="max-width: 50%;"
                         data-bs-target="#uploadModal">
@@ -78,6 +77,15 @@
                     Modify description
                 </button>
                 <p>{{restaurant.location_address}}</p>
+                <div class="col">
+                    <select name="food_category" id="food_category" style="height: 30px;" class="w-75">
+                        <option value="{{restaurant.food_category}}">{{restaurant.food_category.value}}</option>
+                        <hr/>
+                    </select>
+                    <button type="button" class="btn btn-primary ms-3" id="editCategory">
+                        Edit
+                    </button>
+                </div>
             </div>
             <div class="row mt-4">
                 <h3>Coworkers : </h3>
@@ -169,65 +177,65 @@
                     </div>
                 </div>
             </form>
-                <div>
-                    <h2 class="mb-4">Working Hours</h2>
-                    {% if working_hours %}
-                        <table class="table table-bordered table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Day of Week</th>
-                                    <th>Opening Time</th>
-                                    <th>Closing Time</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                
-                                {% for day in working_hours %}
-                                    <tr>
-                                        <td>{{ day.day_of_week }}</td>
-                                        <td>{{ day.opening_time }}</td>
-                                        <td>{{ day.closing_time }}</td>
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+            <div>
+                <h2 class="mb-4 mt-5">Working Hours</h2>
+                {% if working_hours %}
+                <table class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>Day of Week</th>
+                            <th>Opening Time</th>
+                            <th>Closing Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        {% for day in working_hours %}
+                        <tr>
+                            <td>{{ day.day_of_week }}</td>
+                            <td>{{ day.opening_time }}</td>
+                            <td>{{ day.closing_time }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
                 {% else %}
-                    <h3>No working hours set</h3>
+                <h3>No working hours set</h3>
                 {% endif %}
-                </div>
-                <h3>Add working hours</h3>
-                <form id="scheduleForm">
+            </div>
+            <h3>Add working hours</h3>
+            <form id="scheduleForm">
 
-                    <div class="row mt-3">
+                <div class="row mt-3">
 
-                        <div class="col form-group">
-                            <label for="day" class="form-label">Day:</label>
-                            <select id="day" name="day" class="form-select" value="monday" required>
-                                {% for day in ["monday","tuesday","wednesday","thursday","friday","saturday","sunday"] %}
-                                <option value="{{day}}">{{day}}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-
-                        <div class="col form-group">
-                            <label for="start" class="form-label">Opening hour:</label>
-                            <input type="time" id="start" name="start" class="form-control" required>
-                        </div>
-
-                        <div class="col form-group">
-                            <label for="end" class="form-label">Closing hour:</label>
-                            <input type="time" id="end" name="end" class="form-control" required>
-                            <br>
-                        </div>
-
-                        <div class="d-flex flex-column col justify-content-center">
-                            <div class="p-2 pt-3">
-                                <button type="submit" class="btn btn-primary">Save</button>
-                            </div>
-                        </div>
+                    <div class="col form-group">
+                        <label for="day" class="form-label">Day:</label>
+                        <select id="day" name="day" class="form-select" value="monday" required>
+                            {% for day in ["monday","tuesday","wednesday","thursday","friday","saturday","sunday"] %}
+                            <option value="{{day}}">{{day}}</option>
+                            {% endfor %}
+                        </select>
                     </div>
 
-                </form>
+                    <div class="col form-group">
+                        <label for="start" class="form-label">Opening hour:</label>
+                        <input type="time" id="start" name="start" class="form-control" required>
+                    </div>
+
+                    <div class="col form-group">
+                        <label for="end" class="form-label">Closing hour:</label>
+                        <input type="time" id="end" name="end" class="form-control" required>
+                        <br>
+                    </div>
+
+                    <div class="d-flex flex-column col justify-content-center">
+                        <div class="p-2 pt-3">
+                            <button type="submit" class="btn btn-primary">Save</button>
+                        </div>
+                    </div>
+                </div>
+
+            </form>
         </div>
     </div>
 </div>
@@ -424,7 +432,7 @@
         event.preventDefault();
 
         const pathArray = window.location.pathname.split('/');
-        const restaurantId = pathArray[pathArray.length - 1]; 
+        const restaurantId = pathArray[pathArray.length - 1];
 
         const dayInput = document.getElementById('day');
         const startInput = document.getElementById('start');
@@ -532,6 +540,59 @@
     }
 </script>
 
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const foodCategorySelect = document.getElementById("food_category");
+  
+      // Appeler l'API pour récupérer les catégories
+      fetch("/staff/api/v1/restaurant/food_categories")
+        .then(response => response.json())
+        .then(data => {
+          const categories = data.categories;
+  
+          // Ajouter chaque catégorie comme option
+          categories.forEach(category => {
+            const option = document.createElement("option");
+            option.value = category;
+            option.textContent = category;
+            foodCategorySelect.appendChild(option);
+          });
+        })
+        .catch(error => console.error("Error fetching food categories:", error));
+    });
+  </script>
+
+<script>
+    document.getElementById('editCategory').addEventListener('click', function () {
+        const foodCategorySelect = document.getElementById("food_category");
+
+        const pathArray = window.location.pathname.split('/');
+        const restaurantId = pathArray[pathArray.length - 1]; // récupère le dernier élément du chemin
+
+        fetch(`/staff/api/v1/upload/edit_food_category/${restaurantId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                food_category: foodCategorySelect.value
+            })
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(response.status);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Category successfully modified');
+                location.reload();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    });
+</script>
 
 {% endblock %}
 
