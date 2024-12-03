@@ -4,7 +4,7 @@ from botocore.exceptions import NoCredentialsError, PartialCredentialsError
 from flask import Flask, request, jsonify, redirect
 from werkzeug.utils import secure_filename
 from data.db_engine import DATABASE_URL
-from services.db_service import add_picture, get_picture_by_id, add_restaurant, modify_description, add_working_hours, get_working_hours, modify_working_hours, delete_picture, get_restaurant_by_owner
+from services.db_service import add_picture, edit_food_category, get_picture_by_id, add_restaurant, modify_description, add_working_hours, get_working_hours, modify_working_hours, delete_picture, get_restaurant_by_owner
 from services.auth_service import get_user
 from datetime import datetime
 from string import ascii_letters, digits
@@ -250,6 +250,7 @@ class CreateRestaurant(Resource):
             data['location_longitude']=request.form['location_longitude']
             data['owner_user_id']=request.form['owner_user_id']
             data['time_zone']=request.form['time_zone']
+            data['food_category'] = request.form['food_category']
             restaurant_image = request.files.get('restaurant_image')
             uploaded_url = []
 
@@ -295,3 +296,40 @@ class CreateRestaurant(Resource):
                 return {"message": "Restaurant not created"}, 500
         except Exception as e :
             return f'Error : {e}', 500
+        
+
+@api.route('/edit_food_category/<int:restaurant_id>')
+class EditFoodCategory(Resource):
+    @api.doc("Edit the food category")
+    @api.expect({
+        "food_category":fields.String(required=True)
+    })
+    @api.response(200,"Food category edited")
+    @api.response(403,"You are not logged in")
+    @api.response(403,"You are not the owner of this restaurant")
+    @api.response(500,"Food category not edited")
+    def post(self, restaurant_id):
+        try:
+            if 'x-amzn-oidc-accesstoken' in request.headers:
+                access_token = request.headers.get('x-amzn-oidc-accesstoken')
+            elif "access_token" in request.cookies:
+                access_token=request.cookies.get("access_token")
+            else:
+                return "You are not logged in", 403
+            
+            user=get_user(access_token)
+            if user is None:
+                return "You are not logged in", 403
+            restaurants = get_restaurant_by_owner(user.get('id'))
+            if restaurants is None or int(restaurant_id) not in [restaurant.get('id') for restaurant in restaurants]:
+                return "You are not the owner of this restaurant", 403
+
+            data = request.json
+            food_category = data['food_category']
+            result = edit_food_category(food_category, restaurant_id)
+            if result:
+                return {"message": "Food category edited", "restaurant_id": restaurant_id}, 200
+            else: 
+                return {"message": "Food category not edited", "restaurant_id": restaurant_id}, 500
+        except Exception as e :
+            return {"message": 'Error : ' + str(e)}, 500

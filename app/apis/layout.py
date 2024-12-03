@@ -1,6 +1,7 @@
 from flask import json, jsonify, redirect, request
 from flask_restx import Namespace,Resource,fields
 from sqlalchemy.exc import IntegrityError
+from data.models.Restaurant import FoodCategoryEnum
 from services.db_service import add_table,get_all_tables,get_all_restaurants, get_reservations, update_reservation, get_restaurant_by_owner
 
 
@@ -120,3 +121,11 @@ class Reservations(Resource):
                 return redirect(f"/ui/restaurant/{result.restaurant_id}/reservations")
             else:
                 return result,200
+            
+
+@api.route("/food_categories")
+class FoodCategories(Resource):
+    @api.doc("get all food categories")
+    @api.response(200,description="food categories")
+    def get(self):
+        return {"categories": [category.value for category in FoodCategoryEnum]}
