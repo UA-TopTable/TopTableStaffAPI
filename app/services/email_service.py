@@ -26,8 +26,8 @@ Sincerely,
 
 def send_reservation_response_email(status,destination_email,reservation_id,origin_email=os.getenv("MAIL_USERNAME")):
     reservation=get_reservation_by_id(reservation_id,True)
-    customer=get_user_by_id(reservation.user_id).full_name
-    restaurant=get_user_by_id(reservation.restaurant_id).name
+    customer=get_user_by_id(reservation.user_id)
+    restaurant=get_user_by_id(reservation.restaurant_id)
 
     if status=="confirmed":
         msg=Message(
