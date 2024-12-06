@@ -4,7 +4,7 @@ from flask import Flask,jsonify, redirect, request, session
 from flask_mail import Mail
 from flask_restx import Api
 
-from secret import FLASK_SECRET_KEY
+from secret import FLASK_SECRET_KEY, ROOT_PATH_PREFIX
 from apis import blueprint,api
 
 from dotenv import load_dotenv
@@ -29,7 +29,7 @@ def create_app():
 
 app=create_app()
 mail=Mail(app)
-socketio = SocketIO(app)
+socketio = SocketIO(app,path=f"{ROOT_PATH_PREFIX}/socket.io")
 
 if __name__ == "__main__":
     socketio.run(app)
