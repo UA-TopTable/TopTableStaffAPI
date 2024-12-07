@@ -246,10 +246,7 @@ class CreateRestaurant(Resource):
             data['name']=request.form['name']
             data['description']=request.form['description']
             data['location_address']=request.form['location_address']
-            data['location_latitude']=request.form['location_latitude']
-            data['location_longitude']=request.form['location_longitude']
             data['owner_user_id']=request.form['owner_user_id']
-            data['time_zone']=request.form['time_zone']
             data['food_category'] = request.form['food_category']
             restaurant_image = request.files.get('restaurant_image')
             uploaded_url = []

@@ -224,10 +224,10 @@ def add_restaurant(restaurant_data: dict):
             name=restaurant_data['name'],
             description=restaurant_data.get('description'),
             location_address=restaurant_data.get('location_address'),
-            location_latitude=Decimal(str(restaurant_data['location_latitude'])),
-            location_longitude=Decimal(str(restaurant_data['location_longitude'])),
+            location_latitude=1,
+            location_longitude=1,
             restaurant_image=restaurant_data.get('restaurant_image'),
-            time_zone=restaurant_data.get('time_zone'),
+            time_zone='UTC',
             owner_user_id=restaurant_data.get('owner_user_id'),
             food_category=restaurant_data.get('food_category')
         )
