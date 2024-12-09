@@ -1,5 +1,6 @@
 import json
 import os
+import sys
 import boto3
 from flask import request
 from flask_socketio import emit
@@ -8,7 +9,7 @@ from flask_socketio import emit
 from app import socketio
 from services.auth_service import get_user
 from services.email_service import send_reservation_response_email
-from services.db_service import get_all_restaurants_by_owner_email, get_reservation_by_id, update_reservation
+from services.db_service import get_all_restaurants_by_owner_email, get_reservation_by_id, get_restaurant_by_owner, update_reservation
 from services.queue_service import delete_reservation_confirmation, get_reservation_confirmation
 
 
@@ -30,10 +31,9 @@ def listen_for_confirm_reservations(data):
         emit("not authenticated")
         return
     
-    email=user.get('email')
-    restaurant_ids=get_all_restaurants_by_owner_email(email)
-
-    if restaurant_ids is None:
+    restaurant_ids=[restaurant.get('id') for restaurant in get_restaurant_by_owner(user.get('id'))]
+    print(restaurant_ids,file=sys.stderr)
+    if restaurant_ids!=[]:
         reservation_request=get_reservation_confirmation(restaurant_ids)
 
         if reservation_request is not None:
