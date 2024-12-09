@@ -29,7 +29,7 @@ def create_app():
 
 app=create_app()
 mail=Mail(app)
-socketio = SocketIO(app)
+socketio = SocketIO(app,path=f'{ROOT_PATH_PREFIX}/socket.io')
 
 if __name__ == "__main__":
     socketio.run(app)
