@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 def create_app():
-    app = Flask(__name__)
+    app = Flask(__name__, static_url_path=f'/{ROOT_PATH_PREFIX}/static')
     api.init_app(app)
 
     app.secret_key=FLASK_SECRET_KEY
