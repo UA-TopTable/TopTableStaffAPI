@@ -43,7 +43,7 @@ class RestaurantPage(Resource):
             return make_response("No restaurant found", 404)
         else:
             return make_response(
-                render_template("manage_restaurant.html", restaurant=restaurant, tables=tables, pictures = pictures, working_hours = working_hours, coworkers = coworkers,email=user.get('email')),
+                render_template("manage_restaurant.html", restaurant=restaurant, tables=tables, pictures = pictures, working_hours = working_hours, coworkers = coworkers),
                 200,
                 {'Content-Type': 'text/html'}
             )
@@ -68,7 +68,7 @@ class ReservationsPage(Resource):
             reservations.append(reservation)
 
         return make_response(
-            render_template("reservations.html", reservations=reservations,restaurant_id=id,email=user.email),
+            render_template("reservations.html", reservations=reservations,restaurant_id=id),
             200,
             {'Content-Type': 'text/html'}
         )
