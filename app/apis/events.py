@@ -12,10 +12,14 @@ from services.email_service import send_reservation_response_email
 from services.db_service import get_all_restaurants_by_owner_email, get_reservation_by_id, get_restaurant_by_owner, update_reservation
 from services.queue_service import delete_reservation_confirmation, get_reservation_confirmation
 
-
+@socketio.on('connect')
+def connect():
+    print("connected",file=sys.stderr)
 
 @socketio.on('listen_for_reservation_requests')
 def listen_for_confirm_reservations(data):
+
+    print(f"connected: {data}",file=sys.stderr)
 
     if 'x-amzn-oidc-accesstoken' in request.headers:
         access_token = request.headers.get('x-amzn-oidc-accesstoken')
