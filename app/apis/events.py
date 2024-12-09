@@ -17,10 +17,8 @@ def connect():
     print("connected",file=sys.stderr)
 
 @socketio.on('listen_for_reservation_requests')
-def listen_for_confirm_reservations(data):
-
-    print(f"connected: {data}",file=sys.stderr)
-
+def listen_for_confirm_reservations():
+    print("listen for reservation requests",file=sys.stderr)
     if 'x-amzn-oidc-accesstoken' in request.headers:
         access_token = request.headers.get('x-amzn-oidc-accesstoken')
     elif "access_token" in request.cookies:
@@ -53,6 +51,7 @@ def listen_for_confirm_reservations(data):
 
 @socketio.on("confirm_reservation")
 def confirm_reservation(data):
+    print(data,file=sys.stderr)
     reservation_id=data["reservation_id"]
     restaurant_id=data["restaurant_id"]
     sender_email=data["sender_email"]
@@ -70,6 +69,7 @@ def confirm_reservation(data):
 
 @socketio.on("cancel_reservation")
 def cancel_reservation(data):
+    print(data,file=sys.stderr)
     reservation_id=data["reservation_id"]
     restaurant_id=data["restaurant_id"]
     sender_email=data["sender_email"]

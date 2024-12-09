@@ -152,6 +152,7 @@
 
       socket.emit('deny_reservation', { "reservation_id": reservationId, "sender_email": senderEmail, "receipt_handle": receiptHandle, "restaurant_id": restaurantId });
     }
+    socket.emit('listen_for_reservation_requests');
   </script>
 
   {% block scripts %}{% endblock %}
