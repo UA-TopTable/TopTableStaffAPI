@@ -51,6 +51,7 @@ def listen_for_confirm_reservations():
 
 @socketio.on("confirm_reservation")
 def confirm_reservation(data):
+    print(data,file=sys.stderr)
     reservation_id=data["reservation_id"]
     restaurant_id=data["restaurant_id"]
     sender_email=data["sender_email"]
@@ -68,6 +69,7 @@ def confirm_reservation(data):
 
 @socketio.on("cancel_reservation")
 def cancel_reservation(data):
+    print(data,file=sys.stderr)
     reservation_id=data["reservation_id"]
     restaurant_id=data["restaurant_id"]
     sender_email=data["sender_email"]
