@@ -17,10 +17,8 @@ def connect():
     print("connected",file=sys.stderr)
 
 @socketio.on('listen_for_reservation_requests')
-def listen_for_confirm_reservations(data):
-
-    print(f"connected: {data}",file=sys.stderr)
-
+def listen_for_confirm_reservations():
+    print("listen for reservation requests",file=sys.stderr)
     if 'x-amzn-oidc-accesstoken' in request.headers:
         access_token = request.headers.get('x-amzn-oidc-accesstoken')
     elif "access_token" in request.cookies:
