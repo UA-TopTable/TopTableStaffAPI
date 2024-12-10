@@ -32,7 +32,7 @@ class Redirect(Resource):
         if "code" in request.args:
             token=exchange_token(request.args.get("code"))
             resp=redirect("/staff/ui/home") #TODO: change it later
-            resp.set_cookie("access_token",token, secure=True, httponly=True)
+            resp.set_cookie("access_token", token, secure=True, httponly=True)
             return resp
         else:
             return "code not returned",400
