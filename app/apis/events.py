@@ -9,7 +9,7 @@ from flask_socketio import emit
 from app import socketio
 from services.auth_service import get_user
 from services.email_service import send_reservation_response_email
-from services.db_service import get_all_restaurants_by_owner_email, get_reservation_by_id, get_restaurant_by_owner, update_reservation
+from services.db_service import get_all_restaurants_by_owner_email, get_reservation_by_id, get_restaurant_by_owner, get_user_by_id, update_reservation
 from services.queue_service import delete_reservation_confirmation, get_reservation_confirmation
 
 @socketio.on('connect')
@@ -42,12 +42,22 @@ def listen_for_confirm_reservations():
             reservation=get_reservation_by_id(json.loads(reservation_request["Body"].replace("'",'"'))["reservation"]["id"]) #while this might seem dumb, but I want to verify that the reservation is there properly
             print(f"reservation {reservation}",file=sys.stderr)
 
+            if reservation is None:
+                print("reservation is empty",file=sys.stderr)
+                return
+            
+            customer=get_user_by_id(reservation["user_id"])
+            if customer is None:
+                print("customer not found",file=sys.stderr)
+                return
+
+
             if reservation is not None and reservation.get("status")=="pending": #make sure the reservation is still pending (not the best concurrency management, but good enough for this use case)
                 socketio.emit('reservation_request',{
                     "restaurant_id":reservation.get("restaurant_id"),
                     "reservation":reservation,
                     "receipt_handle":reservation_request["ReceiptHandle"],
-                    "sender_email": reservation_request["MessageAttributes"]["senderEmail"]["StringValue"]
+                    "sender_email": customer.email
                 })
 
 @socketio.on("confirm_reservation")
