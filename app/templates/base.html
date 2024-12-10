@@ -105,8 +105,7 @@
     const socketPath = isProduction ? '/staff/socket.io' : '/socket.io';
 
     const socket = io({path:socketPath});
-    console.log("starting listen");
-    socket.on('listen_for_reservation_requests', (data) => {
+    socket.on('reservation_request', (data) => {
       console.log(data);
       const toastElement = document.getElementById('liveToast');
       const toast = new bootstrap.Toast(toastElement);
@@ -120,7 +119,7 @@
       const receiptHandle = document.getElementById('receiptHandle');
       const restaurantId = document.getElementById('restaurantId');
 
-      tableNumberElement.innerText = data.table_number;
+      tableNumberElement.innerText = data.reservation["table_number"];
       numberOfPeopleElement.innerText = data.reservation["number_of_people"];
       startTimeElement.innerText = data.reservation["start_time"];
       endTimeElement.innerText = data.reservation["end_time"];
@@ -152,6 +151,7 @@
 
       socket.emit('deny_reservation', { "reservation_id": reservationId, "sender_email": senderEmail, "receipt_handle": receiptHandle, "restaurant_id": restaurantId });
     }
+    console.log("starting listen");
     socket.emit('listen_for_reservation_requests');
   </script>
 
