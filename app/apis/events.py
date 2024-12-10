@@ -9,7 +9,7 @@ from flask_socketio import emit
 from app import socketio
 from services.auth_service import get_user
 from services.email_service import send_reservation_response_email
-from services.db_service import get_all_restaurants_by_owner_email, get_reservation_by_id, get_restaurant_by_owner, get_user_by_id, update_reservation
+from services.db_service import get_all_restaurants_by_owner_email, get_reservation_by_id, get_restaurant, get_restaurant_by_owner, get_table_by_id, get_user_by_id, update_reservation
 from services.queue_service import delete_reservation_confirmation, get_reservation_confirmation
 
 @socketio.on('connect')
@@ -41,14 +41,26 @@ def listen_for_confirm_reservations():
         if reservation_request is not None:
             reservation=get_reservation_by_id(json.loads(reservation_request["Body"].replace("'",'"'))["reservation"]["id"]) #while this might seem dumb, but I want to verify that the reservation is there properly
             print(f"reservation {reservation}",file=sys.stderr)
-
             if reservation is None:
                 print("reservation is empty",file=sys.stderr)
                 return
-            
+
             customer=get_user_by_id(reservation["user_id"])
             if customer is None:
                 print("customer not found",file=sys.stderr)
+                return
+            print(f"customer: {customer.as_dict()}",file=sys.stderr)
+            
+            restaurant=get_restaurant(reservation["restaurant_id"],as_json=False)[0]
+
+            if restaurant is None:
+                print("restaurant not found",file=sys.stderr)
+                return
+            
+            table=get_table_by_id(reservation["dining_table_id"])
+
+            if table is None:
+                print("table not found",file=sys.stderr)
                 return
 
 
@@ -56,6 +68,8 @@ def listen_for_confirm_reservations():
                 socketio.emit('reservation_request',{
                     "restaurant_id":reservation.get("restaurant_id"),
                     "reservation":reservation,
+                    "restaurant":restaurant.as_dict(),
+                    "table":table.as_dict(),
                     "receipt_handle":reservation_request["ReceiptHandle"],
                     "sender_email": customer.email
                 })
@@ -73,7 +87,7 @@ def confirm_reservation(data):
     if reservation is not None:
         socketio.emit("reservation_confirmed",{"reservation":reservation.as_dict()})
 
-    delete_reservation_confirmation(receipt_handle)
+    delete_reservation_confirmation(receipt_handle,queue_url=os.getenv("SQS_RESERVATION_RESQUESTS_QUEUE_URL"))
     send_reservation_response_email("confirmed",sender_email,reservation_id)
 
 
@@ -91,6 +105,6 @@ def cancel_reservation(data):
     if reservation is not None:
         socketio.emit("reservation_cancelled",{"reservation":reservation.as_dict()})
         
-    delete_reservation_confirmation(receipt_handle)
+    delete_reservation_confirmation(receipt_handle,queue_url=os.getenv("SQS_RESERVATION_RESQUESTS_QUEUE_URL"))
     send_reservation_response_email("cancelled",sender_email,reservation_id)
         

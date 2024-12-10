@@ -40,7 +40,7 @@
   </nav>
 
   <div class="toast-container position-fixed bottom-0 end-0 p-3">
-    <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+    <div id="liveToast" class="toast w-auto" role="alert" aria-live="assertive" aria-atomic="true">
       <div class="toast-header">
         <i class="fa fa-circle-plus"></i>
         <strong class="me-auto ms-1">New Reservation Received</strong>
@@ -53,38 +53,34 @@
         <input type="hidden" id="receiptHandle" value="">
         <input type="hidden" id="restaurantId" value="">
 
-        <div class="d-flex flex-column">
-          <div class="p-0 d-flex flex-row justify-content-evenly">
-            <div class="p-0">
-              <div class="d-flex flex-row">
-                <span class="fw-bold p-2">Table:</span>
-                <span id="table number" class="p-2">22</span>
-              </div>
-            </div>
-            <div class="p-0">
-              <div class="d-flex flex-row">
-                <span class="fw-bold p-2">People:</span>
-                <span id="number people" class="p-2">4</span>
-              </div>
-            </div>
-          </div>
+        <table class="table table-borderless px-5">
+          <thead>
+            <tr>
+              <th scope="col">Table number</th>
+              <th scope="col">Reservation code</th>
+              <th scope="col">Restaurant name</th>
+              <th scope="col">Number of people</th>
+              <th scope="col">Start time</th>
+              <th scope="col">End time</th>
+              <th scope="col">Special Requests</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td id="table number"></td>
+              <td id="reservation code"></td>
+              <td id="restaurant name"></td>
+              <td id="number people"></td>
+              <td id="start time"></td>
+              <td id="end time"></td>
+              <td id="special requests"></td>
+            </tr>
+          </tbody>
+        </table>
 
-          <div class="p-0 d-flex flex-row justify-content-evenly">
-            <div class="p-0">
-              <div class="d-flex flex-row">
-                <span class="fw-bold p-2">Starts:</span>
-                <span id="start time" class="p-2">00:00</span>
-              </div>
-            </div>
-            <div class="p-0">
-              <div class="d-flex flex-row">
-                <span class="fw-bold p-2">Ends:</span>
-                <span id="end time" class="p-2">00:00</span>
-              </div>
-            </div>
-          </div>
-          <div class="p-0 d-flex flex-row justify-content-evenly">
-            <button onclick="acceptReservation()" type="button" class="btn btn-success" id="accept"><i
+        <div class="d-flex flex-column">
+          <div class="p-0 d-flex flex-row justify-content-center">
+            <button onclick="acceptReservation()" type="button" class="btn btn-success me-2" id="accept"><i
                 class="fa fa-check"></i> Accept</button>
             <button onclick="denyReservation()" type="button" class="btn btn-danger" id="accept"><i
                 class="fa fa-ban"></i> Deny</button>
@@ -108,23 +104,31 @@
     socket.on('reservation_request', (data) => {
       console.log(data);
       const toastElement = document.getElementById('liveToast');
-      const toast = new bootstrap.Toast(toastElement);
+      const toast = new bootstrap.Toast(toastElement,{autohide:false});
 
       const tableNumberElement = document.getElementById('table number');
+      const reservationCodeElement = document.getElementById('reservation code');
+      const restaurantNameElement = document.getElementById('restaurant name');
       const numberOfPeopleElement = document.getElementById('number people');
       const startTimeElement = document.getElementById('start time');
       const endTimeElement = document.getElementById('end time');
+      const specialRequestsElement = document.getElementById('special requests');
+
       const reservationIdHidden = document.getElementById('reservationId');
       const senderEmail = document.getElementById('senderEmail');
       const receiptHandle = document.getElementById('receiptHandle');
       const restaurantId = document.getElementById('restaurantId');
 
-      tableNumberElement.innerText = data.reservation["table_number"];
-      numberOfPeopleElement.innerText = data.reservation["number_of_people"];
-      startTimeElement.innerText = data.reservation["start_time"];
-      endTimeElement.innerText = data.reservation["end_time"];
-      reservationIdHidden.value = data.reservation["id"];
-      senderEmail.value = data.reservation["sender_email"];
+      tableNumberElement.innerText = data.table.table_number;
+      reservationCodeElement.innerText = data.reservation.reservation_code;
+      restaurantNameElement.innerText = data.restaurant.name;
+      numberOfPeopleElement.innerText = data.reservation.number_of_people;
+      startTimeElement.innerText = formatDateTime(data.reservation.reservation_start_time);
+      endTimeElement.innerText = formatDateTime(data.reservation.reservation_end_time);
+      specialRequestsElement.innerText = data.reservation.special_requests || "None";
+
+      reservationIdHidden.value = data.reservation.id;
+      senderEmail.value = data.sender_email;
       receiptHandle.value = data.receipt_handle;
       restaurantId.value = data.restaurant_id;
       toast.show();
@@ -135,12 +139,15 @@
     })
 
     function acceptReservation() {
+      console.log("accepting reservation");
       const reservationId = document.getElementById('reservationId').value;
       const senderEmail = document.getElementById('senderEmail').value;
       const receiptHandle = document.getElementById('receiptHandle').value;
       const restaurantId = document.getElementById('restaurantId').value;
 
-      socket.emit('accept_reservation', { "reservation_id": reservationId, "sender_email": senderEmail, "receipt_handle": receiptHandle, "restaurant_id": restaurantId });
+
+      console.log('confirm_reservation', { "reservation_id": reservationId, "sender_email": senderEmail, "receipt_handle": receiptHandle, "restaurant_id": restaurantId })
+      socket.emit('confirm_reservation', { "reservation_id": reservationId, "sender_email": senderEmail, "receipt_handle": receiptHandle, "restaurant_id": restaurantId });
     }
 
     function denyReservation() {
@@ -149,7 +156,12 @@
       const receiptHandle = document.getElementById('receiptHandle').value;
       const restaurantId = document.getElementById('restaurantId').value;
 
-      socket.emit('deny_reservation', { "reservation_id": reservationId, "sender_email": senderEmail, "receipt_handle": receiptHandle, "restaurant_id": restaurantId });
+      socket.emit('cancel_reservation', { "reservation_id": reservationId, "sender_email": senderEmail, "receipt_handle": receiptHandle, "restaurant_id": restaurantId });
+    }
+
+    function formatDateTime(dateTimeString) {
+      const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
+      return new Date(dateTimeString).toLocaleString([], options);
     }
     console.log("starting listen");
     socket.emit('listen_for_reservation_requests');
