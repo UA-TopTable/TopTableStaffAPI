@@ -34,17 +34,18 @@ def listen_for_confirm_reservations():
         return
     
     restaurant_ids=[restaurant.get('id') for restaurant in get_restaurant_by_owner(user.get('id'))]
-    print(restaurant_ids,file=sys.stderr)
+    print(f"restaurant ids: {restaurant_ids}",file=sys.stderr)
     if restaurant_ids!=[]:
         reservation_request=get_reservation_confirmation(restaurant_ids)
 
         if reservation_request is not None:
             reservation=get_reservation_by_id(json.loads(reservation_request["Body"].replace("'",'"'))["reservation"]["id"]) #while this might seem dumb, but I want to verify that the reservation is there properly
+            print(f"reservation {reservation}",file=sys.stderr)
 
             if reservation is not None and reservation.get("status")=="pending": #make sure the reservation is still pending (not the best concurrency management, but good enough for this use case)
                 socketio.emit('reservation_request',{
                     "restaurant_id":reservation.get("restaurant_id"),
-                    "reservation":reservation.as_dict(),
+                    "reservation":reservation,
                     "receipt_handle":reservation_request["ReceiptHandle"],
                     "sender_email": reservation_request["MessageAttributes"]["senderEmail"]["StringValue"]
                 })
