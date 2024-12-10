@@ -41,9 +41,9 @@ def listen_for_confirm_reservations():
         if reservation_request is not None:
             reservation=get_reservation_by_id(json.loads(reservation_request["Body"].replace("'",'"'))["reservation"]["id"]) #while this might seem dumb, but I want to verify that the reservation is there properly
 
-            if reservation is not None and reservation.status=="pending": #make sure the reservation is still pending (not the best concurrency management, but good enough for this use case)
+            if reservation is not None and reservation.get("status")=="pending": #make sure the reservation is still pending (not the best concurrency management, but good enough for this use case)
                 socketio.emit('reservation_request',{
-                    "restaurant_id":reservation.restaurant_id,
+                    "restaurant_id":reservation.get("restaurant_id"),
                     "reservation":reservation.as_dict(),
                     "receipt_handle":reservation_request["ReceiptHandle"],
                     "sender_email": reservation_request["MessageAttributes"]["senderEmail"]["StringValue"]
