@@ -2,7 +2,8 @@ from flask import redirect, request
 from flask_restx import Namespace,Resource,fields
 from services.auth_service import exchange_token, get_user
 from secret import API_URL, AWS_COGNITO_USER_POOL_CLIENT_ID, COGNITO_DOMAIN
-
+SESSION_COOKIE_NAME_0 = "AWSELBAuthSessionCookie-0"
+SESSION_COOKIE_NAME_1 = "AWSELBAuthSessionCookie-1"
 api=Namespace("auth",path="/auth",description="Authentication operations")
 
 @api.route("/login")
@@ -11,13 +12,16 @@ class Login(Resource):
     def get(self):
         return redirect(f"https://{COGNITO_DOMAIN}/login?&client_id={AWS_COGNITO_USER_POOL_CLIENT_ID}&redirect_uri={API_URL}/staff/auth/callback&response_type=code")
         
-@api.route("/sign_out")
+@api.route("/logout")
 class SignOut(Resource):
     @api.doc("sign out")
     @api.response(301,"redirecting to home page")
     def get(self):
-        resp=redirect("/staff/ui/home") #TODO: change to restaurant home page (when we have one)
+        print("logging out")
+        resp=redirect(f"https://{COGNITO_DOMAIN}/logout?&client_id={AWS_COGNITO_USER_POOL_CLIENT_ID}&redirect_uri={API_URL}/customer/auth/callback&response_type=code")
         resp.delete_cookie("access_token")
+        resp.set_cookie(SESSION_COOKIE_NAME_0, "empty", max_age=-3600)
+        resp.set_cookie(SESSION_COOKIE_NAME_1, "empty", max_age=-3600)
         return resp
         
 @api.route("/callback")
