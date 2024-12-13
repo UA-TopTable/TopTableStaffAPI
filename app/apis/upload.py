@@ -4,7 +4,7 @@ from botocore.exceptions import NoCredentialsError, PartialCredentialsError
 from flask import Flask, request, jsonify, redirect
 from werkzeug.utils import secure_filename
 from data.db_engine import DATABASE_URL
-from services.db_service import add_picture, edit_food_category, get_picture_by_id, add_restaurant, modify_description, add_working_hours, get_working_hours, modify_working_hours, delete_picture, get_restaurant_by_owner
+from services.db_service import add_picture, get_pictures, get_restaurant, edit_restaurant_main_picture, edit_food_category, get_picture_by_id, add_restaurant, modify_description, add_working_hours, get_working_hours, modify_working_hours, delete_picture, get_restaurant_by_owner
 from services.auth_service import get_user
 from datetime import datetime
 from string import ascii_letters, digits
@@ -59,7 +59,7 @@ class ImageUpload(Resource):
                 return "You are not the owner of this restaurant", 403
         except : 
             return  'Error checking for the authentication of the user', 500
-
+        i=0
         for file in files :
             if file.filename == '':
                 return {"message": "Invalid file name"}, 400
@@ -84,6 +84,9 @@ class ImageUpload(Resource):
                 uploaded_url.append(file_url)
                 #Fill in the DB with the new image
                 add_picture(file_url, restaurant_id)
+                if i == 0 :
+                    edit_restaurant_main_picture(file_url, restaurant_id)
+                i+=1
 
             except (NoCredentialsError, PartialCredentialsError):
                 return {"message": "Missing credentials"}, 500
@@ -210,11 +213,15 @@ class DeletePicture(Resource):
             data = request.json
             picture_id = data['picture_id']
             picture = get_picture_by_id(picture_id)
+            restaurant = get_restaurant(restaurant_id)[0]
+            if picture['link'] == restaurant['restaurant_image'] :
+                restaurant_pictures = get_pictures(restaurant_id)
+                edit_restaurant_main_picture(restaurant_pictures[0]['link'], restaurant_id)
             result = delete_picture(picture_id, restaurant_id)
             try :
                 s3_delete.Object(bucket_name = S3_BUCKET, key = picture['link'])
             except Exception as e :
-                return 
+                return {"message": 'Error : ' + str(e)}, 500
             if result == True :
                 return {"message": "Picture deleted", "restaurant_id": restaurant_id}, 200
             else : 
@@ -328,5 +335,42 @@ class EditFoodCategory(Resource):
                 return {"message": "Food category edited", "restaurant_id": restaurant_id}, 200
             else: 
                 return {"message": "Food category not edited", "restaurant_id": restaurant_id}, 500
+        except Exception as e :
+            return {"message": 'Error : ' + str(e)}, 500
+        
+@api.route('/edit_main_picture/<int:restaurant_id>')
+class EditRestaurantMainPicture(Resource):
+    @api.doc("Edit the picture showed in the home page")
+    @api.expect({
+        "picture_link":fields.String(required=True)
+    })
+    @api.response(200,"Main picture edited")
+    @api.response(403,"You are not logged in")
+    @api.response(403,"You are not the owner of this restaurant")
+    @api.response(500,"Main picture not edited")
+    def post(self, restaurant_id):
+        try:
+            if 'x-amzn-oidc-accesstoken' in request.headers:
+                access_token = request.headers.get('x-amzn-oidc-accesstoken')
+            elif "access_token" in request.cookies:
+                access_token=request.cookies.get("access_token")
+            else:
+                return "You are not logged in", 403
+            
+            user=get_user(access_token)
+            if user is None:
+                return "You are not logged in", 403
+            restaurants = get_restaurant_by_owner(user.get('id'))
+            if restaurants is None or int(restaurant_id) not in [restaurant.get('id') for restaurant in restaurants]:
+                return "You are not the owner of this restaurant", 403
+
+            data = request.json
+            picture_id = data['picture_id']
+            picture = get_picture_by_id(picture_id)
+            result = edit_restaurant_main_picture(picture['link'], restaurant_id)
+            if result:
+                return {"message": "Main picture edited", "restaurant_id": restaurant_id}, 200
+            else: 
+                return {"message": "Main picture not edited", "restaurant_id": restaurant_id}, 500
         except Exception as e :
             return {"message": 'Error : ' + str(e)}, 500

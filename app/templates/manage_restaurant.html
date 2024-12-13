@@ -29,6 +29,32 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="mainImageModal" tabindex="-1" aria-labelledby="mainImageModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="mainImageModalLabel">Choose Main Image</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    {% for pic in pictures %}
+                    <div class="col-4 mb-3">
+                        <img src="{{ pic.link }}" class="restaurant-page-img img-fluid" alt="{{ pic.link }}">
+                        <button class="btn btn-primary mt-2" onclick="setMainImage('{{pic.id}}')">
+                            Set as Main Image
+                        </button>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
 {% endif %}
 
 
@@ -548,6 +574,35 @@
 
     }
 </script>
+
+<script>
+    function setMainImage(picture_id) {
+        const pathArray = window.location.pathname.split('/');
+        const restaurantId = pathArray[pathArray.length - 1];
+        const data = {
+            picture_id: parseInt(picture_id)
+        };
+
+        fetch(`/staff/api/v1/upload/edit_main_picture/${restaurantId}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+        })
+            .then(response => {
+                console.log(response); // Vérifie l'objet réponse
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => console.log(data))
+            .then(() => location.reload())
+            .catch(error => console.error('Error:', error));
+    }
+</script>
+
 
 <script>
     document.addEventListener("DOMContentLoaded", () => {

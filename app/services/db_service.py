@@ -308,3 +308,13 @@ def edit_food_category(food_category, restaurant_id):
         restaurant.food_category = food_category
         session.commit()
         return restaurant.as_dict() if restaurant else None
+    
+def edit_restaurant_main_picture(restaurant_id, picture_link):
+    try :
+        with Session(engine) as session:
+            restaurant = session.query(Restaurant).filter(Restaurant.id == restaurant_id).first()
+            restaurant.restaurant_image = picture_link
+            session.commit()
+            return restaurant.as_dict() if restaurant else None
+    except :
+        return None
