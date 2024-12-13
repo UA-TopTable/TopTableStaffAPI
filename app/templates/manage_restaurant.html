@@ -130,7 +130,10 @@
         <div class="col-1"></div>
         <div class="col">
             <div class="card shadow-sm backgroud-secondary-subtle px-2 py-2">
-                <h3 class="ms-2">Tables:</h3>
+                <div class="d-flex justify-content-between mb-1">
+                    <div class="ps-2"><h3 class="ms-2">Tables:</h3></div>
+                    <div class="pe-2"><a href="{{ url_for('ui_reservations_page', id=restaurant.id) }}" class="btn btn-primary">Reservations</a></div>
+                </div>
                 <div class="list-container">
                     <ul class="list-group mx-2" id="tables_list">
                         <li class="list-group-item" style="
