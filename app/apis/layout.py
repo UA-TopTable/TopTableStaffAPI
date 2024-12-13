@@ -118,7 +118,7 @@ class Reservations(Resource):
             return "reservation does not exist",404
         else:
             if from_form:
-                return redirect(f"/ui/restaurant/{result.restaurant_id}/reservations")
+                return redirect(f"/staff/ui/restaurant/{result.restaurant_id}/reservations")
             else:
                 return result,200
             
