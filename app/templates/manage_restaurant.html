@@ -90,6 +90,9 @@
                         <button class="btn btn-danger" onclick="deletePicture('{{pictures[0].id}}')">
                             <i class="bi bi-trash"></i>
                         </button>
+                        <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#mainImageModal">
+                            Set as Main Image
+                        </button>
                         {% endif %}
                         <button type="button" class="btn btn-primary ms-3" data-bs-toggle="modal" style="max-width: 50%;"
                             data-bs-target="#uploadModal">

@@ -230,10 +230,10 @@ class DeletePicture(Resource):
                         edit_main_picture = edit_restaurant_main_picture(restaurant_id, restaurant_pictures[0]['link'])
                     else :
                         edit_main_picture = edit_restaurant_main_picture(restaurant_id, '')
-                        return {"message": "Picture deleted, no other pictures available to be main picture", "restaurant_id": restaurant_id}, 500
+                        return {"message": "Picture deleted, no other pictures available to be main picture", "restaurant_id": restaurant_id}, 200
                     if edit_main_picture == False :
                         edit_main_picture = edit_restaurant_main_picture(restaurant_id, '')
-                        return {"message": "Picture deleted, not possible to change the main picture", "restaurant_id": restaurant_id}, 500
+                        return {"message": "Picture deleted, not possible to change the main picture", "restaurant_id": restaurant_id}, 200
                 try :
                     s3_delete.Object(bucket_name = S3_BUCKET, key = picture['link'])
                 except Exception as e :
