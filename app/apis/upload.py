@@ -391,7 +391,7 @@ class EditRestaurantMainPicture(Resource):
 @api.route('/delete_restaurant/<int:restaurant_id>')
 class DeleteRestaurant(Resource):
     @api.doc("Delete a restaurant")
-    @api.response(200,"Restaurant deleted")
+    @api.response(302,"Restaurant deleted")
     @api.response(403,"You are not logged in")
     @api.response(500,"Restaurant not deleted")
     def delete(self, restaurant_id):
@@ -460,7 +460,7 @@ class DeleteRestaurant(Resource):
             except Exception as e :
                 return {"message": 'Error with restaurant : ' + str(e)}, 500
             if result:
-                return {"message": "Restaurant deleted", "restaurant_id": restaurant_id}, 200
+                return {"message": "Restaurant deleted", "restaurant_id": restaurant_id}, 302
             else: 
                 return {"message": f"Restaurant not deleted : {result}", "restaurant_id": restaurant_id}, 500
 
