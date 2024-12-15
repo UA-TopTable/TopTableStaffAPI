@@ -76,7 +76,7 @@
 
           <!-- Submit Button -->
           <div class="d-flex justify-content-end">
-            <button type="submit" class="btn btn-primary">Save</button>
+            <button type="submit" id="addRestaurantButton" class="btn btn-primary">Save</button>
           </div>
         </form>
       </div>
@@ -155,6 +155,10 @@
     // Ajouter un ID utilisateur caché si nécessaire (si vous gérez l'ID de l'utilisateur)
     const ownerUserId = document.getElementById('owner_user_id').value;
     formData.append('owner_user_id', ownerUserId);
+
+    const uploadButton = document.getElementById("addRestaurantButton");
+    uploadButton.textContent = "Uploading...";
+    uploadButton.disabled = true; 
 
     // Envoyer les données via une requête POST
     fetch('/staff/api/v1/upload/create_restaurant/', {

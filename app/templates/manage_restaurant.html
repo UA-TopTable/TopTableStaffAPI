@@ -129,7 +129,7 @@
                 </ul>
             </div>
             <div class="row">
-                <button type="button" class="btn btn-danger ms-3" data-bs-toggle="modal" data-bs-target="#deleteRestaurantModal">
+                <button type="button" class="btn btn-danger mt-5 w-50 " data-bs-toggle="modal" data-bs-target="#deleteRestaurantModal">
                     Delete Restaurant
                 </button>
             </div>
@@ -298,7 +298,7 @@
                                 multiple>
                         </div>
                         <div class="p-2 pt-1">
-                            <button type="submit" class="btn btn-primary">Upload</button>
+                            <button type="submit" id="uploadButton" class="btn btn-primary">Upload</button>
                         </div>
                     </div>
                 </form>
@@ -315,8 +315,8 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <div class="d-flex row">
-                    <button class="btn btn-danger" onclick="deleteRestaurant('{{restaurant.id}}')"> Confirm deletion</i>
+                <div class="d-flex justify-content-center row">
+                    <button class="btn btn-danger btn-sm w-50" onclick="deleteRestaurant('{{restaurant.id}}')"> Confirm deletion</i>
                 </div>
             </div>
         </div>
@@ -377,12 +377,17 @@
         const formData = new FormData();
         const fileInput = document.getElementById('file');
         const pathArray = window.location.pathname.split('/');
-        const restaurantId = pathArray[pathArray.length - 1]; 
+        const restaurantId = pathArray[pathArray.length - 1];
+        const uploadButton = document.getElementById("uploadButton");
 
+        
         if (fileInput.files.length === 0) {
             alert('Please select at least one picture to upload.');
             return;
         }
+        
+        uploadButton.textContent = "Uploading...";
+        uploadButton.disabled = true; 
 
         for (let i = 0; i < fileInput.files.length; i++) {
             formData.append('files[]', fileInput.files[i]);
@@ -398,6 +403,8 @@
                 if (!response.ok) {
                     throw new Error(response.status);
                 }
+                uploadButton.textContent = "Upload";
+                uploadButton.disabled = false;  
                 return response.json();
             })
             .then(data => {
@@ -406,6 +413,7 @@
                     uploadModal.hide();
                 }
                 window.location.href = `/staff/ui/restaurant/${restaurantId}`
+                alert("Upload complete!");
             })
             .catch(error => {
                 console.log("There is an error" + error.message);
