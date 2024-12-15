@@ -413,7 +413,6 @@
                     uploadModal.hide();
                 }
                 window.location.href = `/staff/ui/restaurant/${restaurantId}`
-                alert("Upload complete!");
             })
             .catch(error => {
                 console.log("There is an error" + error.message);
@@ -433,14 +432,7 @@
         const pathArray = window.location.pathname.split('/');
         const restaurantId = pathArray[pathArray.length - 1]; 
 
-
-
-        if (isNaN(restaurantId)) {
-            alert("Veuillez entrer un nombre valide pour le Restaurant ID.");
-            event.preventDefault();
-        }
         formData.append('description', descriptionInput.value);
-        formData.append('restaurant_id', restaurantId);
 
         fetch(`/staff/api/v1/upload/upload_description/${restaurantId}`, {
             method: 'POST',
@@ -460,6 +452,7 @@
                 }
                 window.location.href = `/staff/ui/restaurant/${restaurantId}`
             })
+            .then(() => location.reload())
             .catch(error => {
                 console.log('Error : ' + error.message);
             });
