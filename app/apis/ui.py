@@ -25,19 +25,6 @@ class RestaurantPage(Resource):
         restaurant = get_restaurant(id)[0]
         pictures_list = []
         main_picture = restaurant.get('restaurant_image')
-        if not (main_picture == '' or main_picture is None):
-            parsed_url = urlparse(main_picture)
-            
-            bucket_name = parsed_url.netloc.split('.')[0]
-            object_key = parsed_url.path.lstrip('/')
-            s3_client = boto3.client('s3')
-            signed_url = s3_client.generate_presigned_url(
-                    'get_object',
-                    Params={'Bucket': bucket_name, 'Key': object_key},
-                    ExpiresIn=3600 
-            )
-
-            pictures_list.append({'link': signed_url})
 
         pictures = get_pictures(id)
         working_hours = get_working_hours(id, None)
@@ -54,10 +41,11 @@ class RestaurantPage(Resource):
                         Params={'Bucket': bucket_name, 'Key': object_key},
                         ExpiresIn=3600 
                 )
-                picture['link'] = signed_url
                 if link == main_picture:
+                    picture['link'] = signed_url
                     pictures_list.insert(0, picture)
                 else :
+                    picture['link'] = signed_url
                     pictures_list.append(picture)
 
         if restaurant is None:
