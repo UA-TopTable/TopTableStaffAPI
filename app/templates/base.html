@@ -97,74 +97,75 @@
     crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
   <script>
-    const isProduction= window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
-    const socketPath = isProduction ? '/staff/socket.io' : '/socket.io';
-
-    const socket = io({path:socketPath});
-    socket.on('reservation_request', (data) => {
-      console.log(data);
-      const toastElement = document.getElementById('liveToast');
-      const toast = new bootstrap.Toast(toastElement,{autohide:false});
-
-      const tableNumberElement = document.getElementById('table number');
-      const reservationCodeElement = document.getElementById('reservation code');
-      const restaurantNameElement = document.getElementById('restaurant name');
-      const numberOfPeopleElement = document.getElementById('number people');
-      const startTimeElement = document.getElementById('start time');
-      const endTimeElement = document.getElementById('end time');
-      const specialRequestsElement = document.getElementById('special requests');
-
-      const reservationIdHidden = document.getElementById('reservationId');
-      const senderEmail = document.getElementById('senderEmail');
-      const receiptHandle = document.getElementById('receiptHandle');
-      const restaurantId = document.getElementById('restaurantId');
-
-      tableNumberElement.innerText = data.table.table_number;
-      reservationCodeElement.innerText = data.reservation.reservation_code;
-      restaurantNameElement.innerText = data.restaurant.name;
-      numberOfPeopleElement.innerText = data.reservation.number_of_people;
-      startTimeElement.innerText = formatDateTime(data.reservation.reservation_start_time);
-      endTimeElement.innerText = formatDateTime(data.reservation.reservation_end_time);
-      specialRequestsElement.innerText = data.reservation.special_requests || "None";
-
-      reservationIdHidden.value = data.reservation.id;
-      senderEmail.value = data.sender_email;
-      receiptHandle.value = data.receipt_handle;
-      restaurantId.value = data.restaurant_id;
-      toast.show();
-    });
-
-    socket.on("not authenticated", (data) => {
-      console.log("user is not authenticated");
-    })
-
-    function acceptReservation() {
-      console.log("accepting reservation");
-      const reservationId = document.getElementById('reservationId').value;
-      const senderEmail = document.getElementById('senderEmail').value;
-      const receiptHandle = document.getElementById('receiptHandle').value;
-      const restaurantId = document.getElementById('restaurantId').value;
-
-
-      console.log('confirm_reservation', { "reservation_id": reservationId, "sender_email": senderEmail, "receipt_handle": receiptHandle, "restaurant_id": restaurantId })
-      socket.emit('confirm_reservation', { "reservation_id": reservationId, "sender_email": senderEmail, "receipt_handle": receiptHandle, "restaurant_id": restaurantId });
-    }
-
-    function denyReservation() {
-      const reservationId = document.getElementById('reservationId').value;
-      const senderEmail = document.getElementById('senderEmail').value;
-      const receiptHandle = document.getElementById('receiptHandle').value;
-      const restaurantId = document.getElementById('restaurantId').value;
-
-      socket.emit('cancel_reservation', { "reservation_id": reservationId, "sender_email": senderEmail, "receipt_handle": receiptHandle, "restaurant_id": restaurantId });
-    }
-
-    function formatDateTime(dateTimeString) {
-      const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
-      return new Date(dateTimeString).toLocaleString([], options);
-    }
-    console.log("starting listen");
-    socket.emit('listen_for_reservation_requests');
+    
+    //const isProduction= window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+    //const socketPath = isProduction ? '/staff/socket.io' : '/socket.io';
+//
+    //const socket = io({path:socketPath});
+    //socket.on('reservation_request', (data) => {
+    //  console.log(data);
+    //  const toastElement = document.getElementById('liveToast');
+    //  const toast = new bootstrap.Toast(toastElement,{autohide:false});
+//
+    //  const tableNumberElement = document.getElementById('table number');
+    //  const reservationCodeElement = document.getElementById('reservation code');
+    //  const restaurantNameElement = document.getElementById('restaurant name');
+    //  const numberOfPeopleElement = document.getElementById('number people');
+    //  const startTimeElement = document.getElementById('start time');
+    //  const endTimeElement = document.getElementById('end time');
+    //  const specialRequestsElement = document.getElementById('special requests');
+//
+    //  const reservationIdHidden = document.getElementById('reservationId');
+    //  const senderEmail = document.getElementById('senderEmail');
+    //  const receiptHandle = document.getElementById('receiptHandle');
+    //  const restaurantId = document.getElementById('restaurantId');
+//
+    //  tableNumberElement.innerText = data.table.table_number;
+    //  reservationCodeElement.innerText = data.reservation.reservation_code;
+    //  restaurantNameElement.innerText = data.restaurant.name;
+    //  numberOfPeopleElement.innerText = data.reservation.number_of_people;
+    //  startTimeElement.innerText = formatDateTime(data.reservation.reservation_start_time);
+    //  endTimeElement.innerText = formatDateTime(data.reservation.reservation_end_time);
+    //  specialRequestsElement.innerText = data.reservation.special_requests || "None";
+//
+    //  reservationIdHidden.value = data.reservation.id;
+    //  senderEmail.value = data.sender_email;
+    //  receiptHandle.value = data.receipt_handle;
+    //  restaurantId.value = data.restaurant_id;
+    //  toast.show();
+    //});
+//
+    //socket.on("not authenticated", (data) => {
+    //  console.log("user is not authenticated");
+    //})
+//
+    //function acceptReservation() {
+    //  console.log("accepting reservation");
+    //  const reservationId = document.getElementById('reservationId').value;
+    //  const senderEmail = document.getElementById('senderEmail').value;
+    //  const receiptHandle = document.getElementById('receiptHandle').value;
+    //  const restaurantId = document.getElementById('restaurantId').value;
+//
+//
+    //  console.log('confirm_reservation', { "reservation_id": reservationId, "sender_email": senderEmail, "receipt_handle": receiptHandle, "restaurant_id": restaurantId })
+    //  socket.emit('confirm_reservation', { "reservation_id": reservationId, "sender_email": senderEmail, "receipt_handle": receiptHandle, "restaurant_id": restaurantId });
+    //}
+//
+    //function denyReservation() {
+    //  const reservationId = document.getElementById('reservationId').value;
+    //  const senderEmail = document.getElementById('senderEmail').value;
+    //  const receiptHandle = document.getElementById('receiptHandle').value;
+    //  const restaurantId = document.getElementById('restaurantId').value;
+//
+    //  socket.emit('cancel_reservation', { "reservation_id": reservationId, "sender_email": senderEmail, "receipt_handle": receiptHandle, "restaurant_id": restaurantId });
+    //}
+//
+    //function formatDateTime(dateTimeString) {
+    //  const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
+    //  return new Date(dateTimeString).toLocaleString([], options);
+    //}
+    //console.log("starting listen");
+    //socket.emit('listen_for_reservation_requests');
   </script>
 
   {% block scripts %}{% endblock %}

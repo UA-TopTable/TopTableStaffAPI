@@ -35,7 +35,7 @@ def listen_for_confirm_reservations():
     
     restaurant_ids=[restaurant.get('id') for restaurant in get_restaurant_by_owner(user.get('id'))]
     print(f"restaurant ids: {restaurant_ids}",file=sys.stderr)
-    if restaurant_ids!=[]:
+    if restaurant_ids != None or restaurant_ids!=[]:
         reservation_request=get_reservation_confirmation(restaurant_ids)
 
         if reservation_request is not None:
