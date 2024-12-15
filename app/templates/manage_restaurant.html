@@ -666,7 +666,7 @@
             }
             return response.json();
         })
-        .then(data => console.log(data))
+        .then(data => window.location.href = `/staff/ui/home`)
         .then(() => location.reload())
         .catch(error => console.error('Error:', error));
     }
