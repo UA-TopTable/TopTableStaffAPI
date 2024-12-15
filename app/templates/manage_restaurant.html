@@ -17,7 +17,7 @@
                         <button class="btn btn-danger" onclick="deletePicture('{{pic.id}}')">
                             <i class="bi bi-trash"></i>
                         </button>
-                        <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#mainImageModal">
+                        <button class="btn btn-warning" onclick="setMainImage('{{pic.id}}')">
                             Set as Main Image
                         </button>
                     </div>
@@ -32,34 +32,6 @@
         </div>
     </div>
 </div>
-
-<div class="modal fade" id="mainImageModal" tabindex="-1" aria-labelledby="mainImageModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="mainImageModalLabel">Choose Main Image</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="row">
-                    {% for pic in pictures %}
-                    <div class="col-4 mb-3">
-                        <img src="{{ pic.link }}" class="restaurant-page-img img-fluid" alt="{{ pic.link }}">
-                        <button class="btn btn-primary mt-2" onclick="setMainImage('{{pic.id}}')">
-                            Set as Main Image
-                        </button>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
-{% endif %}
-
 
 <nav class="navbar navbar-light fixed-top bg-white mt-5">
     <div class="container">

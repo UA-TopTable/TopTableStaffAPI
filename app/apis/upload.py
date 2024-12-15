@@ -382,7 +382,7 @@ class EditRestaurantMainPicture(Resource):
             data = request.json
             picture_id = data['picture_id']
             picture = get_picture_by_id(picture_id)
-            result = edit_restaurant_main_picture(picture['link'], restaurant_id)
+            result = edit_restaurant_main_picture(restaurant_id, picture['link'])
             if result:
                 return {"message": "Main picture edited", "restaurant_id": restaurant_id}, 200
             else: 
