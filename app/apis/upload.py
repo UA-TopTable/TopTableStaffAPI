@@ -214,6 +214,10 @@ class DeletePicture(Resource):
             picture_id = data['picture_id']
             picture = get_picture_by_id(picture_id)
             restaurant = get_restaurant(restaurant_id)[0]
+            if picture is None :
+                return {"message": "Picture not found", "restaurant_id": restaurant_id}, 500
+            if restaurant is None :
+                return {"message": "Restaurant not found", "restaurant_id": restaurant_id}, 500
             if picture['link'] == restaurant['restaurant_image'] :
                 restaurant_pictures = get_pictures(restaurant_id)
                 edit_restaurant_main_picture(restaurant_pictures[0]['link'], restaurant_id)
