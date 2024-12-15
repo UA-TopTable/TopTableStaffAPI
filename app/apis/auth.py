@@ -18,7 +18,7 @@ class SignOut(Resource):
     @api.response(301,"redirecting to home page")
     def get(self):
         print("logging out")
-        resp=redirect(f"https://{COGNITO_DOMAIN}/logout?&client_id={AWS_COGNITO_USER_POOL_CLIENT_ID}&redirect_uri={API_URL}/customer/auth/callback&response_type=code")
+        resp=redirect(f"https://{COGNITO_DOMAIN}/logout?&client_id={AWS_COGNITO_USER_POOL_CLIENT_ID}&redirect_uri={API_URL}/staff/auth/callback&response_type=code")
         resp.delete_cookie("access_token")
         resp.set_cookie(SESSION_COOKIE_NAME_0, "empty", max_age=-3600)
         resp.set_cookie(SESSION_COOKIE_NAME_1, "empty", max_age=-3600)
