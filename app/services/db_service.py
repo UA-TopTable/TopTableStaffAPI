@@ -340,8 +340,8 @@ def delete_restaurant(restaurant_id):
             session.delete(restaurant)
             session.commit()
             return True
-    except :
-        return None
+    except Exception as e:
+        return e
     
 def delete_table(table_id):
     try :

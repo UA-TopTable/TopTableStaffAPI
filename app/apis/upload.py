@@ -414,45 +414,55 @@ class DeleteRestaurant(Resource):
             pictures = get_pictures(restaurant_id)
             dining_tables = get_all_tables(restaurant_id)
             coworkers = get_coworkers_by_restaurant_id(restaurant_id)
-            reservations = get_reservations(restaurant_id)
+            reservs = get_reservations(restaurant_id)
+            reservations = [reservation.as_dict() for reservation in reservs]
             working_hours = get_working_hours(restaurant_id, None)
-
-            for picture in pictures :
-                try :
-                    s3_delete.Object(bucket_name = S3_BUCKET, key = picture['link'])
-                    delete_picture(picture['id'], restaurant_id)
-                except Exception as e :
-                    return {"message": 'Error : ' + str(e)}, 500
-
-            for table in dining_tables :
-                try :
-                    delete_table(table['id'])
-                except Exception as e :
-                    return {"message": 'Error : ' + str(e)}, 500
-                
-            for reservation in reservations :
-                try :
-                    delete_reservation(reservation['id'])
-                except Exception as e :
-                    return {"message": 'Error : ' + str(e)}, 500
-                
-            for coworker in coworkers :
-                try :
-                    remove_coworker(coworker['id'])
-                except Exception as e :
-                    return {"message": 'Error : ' + str(e)}, 500
             
-            for working_hour in working_hours :
-                try :
-                    delete_working_hours(working_hour['id'])
-                except Exception as e :
-                    return {"message": 'Error : ' + str(e)}, 500
-            
-            result = delete_restaurant(restaurant_id)
+
+            if pictures is not None :
+                for picture in pictures :
+                    try :
+                        s3_delete.Object(bucket_name = S3_BUCKET, key = picture['link'])
+                        delete_picture(picture['id'], restaurant_id)
+                    except Exception as e :
+                        return {"message": 'Error with pictures : ' + str(e)}, 500
+
+            if dining_tables is not None :
+                for table in dining_tables :
+                    try :
+                        delete_table(table['id'])
+                    except Exception as e :
+                        return {"message": 'Error with tables : ' + str(e)}, 500
+           
+            if reservations is not None :    
+                for reservation in reservations :
+                    try :
+                        delete_reservation(reservation['id'])
+                    except Exception as e :
+                        return {"message": 'Error with reservations : ' + str(e)}, 500
+              
+            if coworkers is not None :
+                for coworker in coworkers :
+                    try :
+                        remove_coworker(restaurant_id, coworker['id'])
+                    except Exception as e :
+                        return {"message": 'Error with coworkers : ' + str(e)}, 500
+          
+            if working_hours is not None :
+                for working_hour in working_hours :
+                    try :
+                        delete_working_hours(restaurant_id, working_hour['day_of_week'])
+                    except Exception as e :
+                        return {"message": 'Error with working hours: ' + str(e)}, 500
+          
+            try :
+                result = delete_restaurant(restaurant_id)
+            except Exception as e :
+                return {"message": 'Error with restaurant : ' + str(e)}, 500
             if result:
                 return {"message": "Restaurant deleted", "restaurant_id": restaurant_id}, 200
             else: 
-                return {"message": "Restaurant not deleted", "restaurant_id": restaurant_id}, 500
+                return {"message": f"Restaurant not deleted : {result}", "restaurant_id": restaurant_id}, 500
 
         except Exception as e :
-            return {"message": 'Error : ' + str(e)}, 500
+            return {"message": 'General Error : ' + str(e)}, 500
