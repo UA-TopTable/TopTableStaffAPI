@@ -351,12 +351,14 @@ class EditFoodCategory(Resource):
         except Exception as e :
             return {"message": 'Error : ' + str(e)}, 500
         
+EditMainPicture_model = api.model('EditMainPicture', {
+    "picture_id":fields.Integer(required=True)
+})
+    
 @api.route('/edit_main_picture/<int:restaurant_id>')
 class EditRestaurantMainPicture(Resource):
     @api.doc("Edit the picture showed in the home page")
-    @api.expect({
-        "picture_id":fields.String(required=True)
-    })
+    @api.expect(EditMainPicture_model)
     @api.response(200,"Main picture edited")
     @api.response(403,"You are not logged in")
     @api.response(403,"You are not the owner of this restaurant")
@@ -386,8 +388,8 @@ class EditRestaurantMainPicture(Resource):
             else: 
                 return {"message": "Main picture not edited", "restaurant_id": restaurant_id}, 500
         except Exception as e :
-            return {"message": 'Error : ' + str(e)}, 500
-        
+            return {"message": 'Error : ' + str(e)}, 500   
+
 @api.route('/delete_restaurant/<int:restaurant_id>')
 class DeleteRestaurant(Resource):
     @api.doc("Delete a restaurant")
