@@ -666,8 +666,11 @@
             }
             return response.json();
         })
-        .then(data => window.location.href = `/staff/ui/home`)
-        .then(() => location.reload())
+        .then(data => {
+            console.log('Deletion successful:', data);
+            // Redirection après suppression réussie
+            window.location.href = "/staff/ui/home";
+        })
         .catch(error => console.error('Error:', error));
     }
 </script>

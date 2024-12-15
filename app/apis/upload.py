@@ -460,7 +460,7 @@ class DeleteRestaurant(Resource):
             except Exception as e :
                 return {"message": 'Error with restaurant : ' + str(e)}, 500
             if result:
-                return {"message": "Restaurant deleted", "restaurant_id": restaurant_id}, 302
+                return {"message": "Restaurant deleted", "restaurant_id": restaurant_id}, 200
             else: 
                 return {"message": f"Restaurant not deleted : {result}", "restaurant_id": restaurant_id}, 500
 
