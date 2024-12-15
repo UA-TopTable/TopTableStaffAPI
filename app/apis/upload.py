@@ -214,19 +214,26 @@ class DeletePicture(Resource):
             picture_id = data['picture_id']
             picture = get_picture_by_id(picture_id)
             restaurant = get_restaurant(restaurant_id)[0]
+
             if picture is None :
                 return {"message": "Picture not found", "restaurant_id": restaurant_id}, 500
             if restaurant is None :
                 return {"message": "Restaurant not found", "restaurant_id": restaurant_id}, 500
-            if picture['link'] == restaurant['restaurant_image'] :
-                restaurant_pictures = get_pictures(restaurant_id)
-                edit_restaurant_main_picture(restaurant_pictures[0]['link'], restaurant_id)
+            
             result = delete_picture(picture_id, restaurant_id)
-            try :
-                s3_delete.Object(bucket_name = S3_BUCKET, key = picture['link'])
-            except Exception as e :
-                return {"message": 'Error : ' + str(e)}, 500
+            
             if result == True :
+                if picture['link'] == restaurant['restaurant_image'] :
+                    restaurant_pictures = get_pictures(restaurant_id)
+                    edit_main_picture = None
+                    if restaurant_pictures is not None and len(restaurant_pictures) > 0 :
+                        edit_main_picture = edit_restaurant_main_picture(restaurant_pictures[0]['link'], restaurant_id)
+                    if edit_main_picture == False or edit_main_picture == None :
+                        return {"message": "Picture deleted, no other pictures available to be main picture", "restaurant_id": restaurant_id}, 500
+                try :
+                    s3_delete.Object(bucket_name = S3_BUCKET, key = picture['link'])
+                except Exception as e :
+                    return {"message": 'Error : ' + str(e)}, 500
                 return {"message": "Picture deleted", "restaurant_id": restaurant_id}, 200
             else : 
                 return {"message": "Picture not deleted", "restaurant_id": restaurant_id}, 500
