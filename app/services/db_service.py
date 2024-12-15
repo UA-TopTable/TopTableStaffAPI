@@ -201,8 +201,8 @@ def get_pictures(restaurant_id):
 def get_picture_by_id(picture_id):
     try :
         with Session(engine) as session :
-            pictures = session.query(RestaurantPictures).filter(RestaurantPictures.id == picture_id).one()
-            return [picture.as_dict() for picture in pictures] if pictures else None
+            picture = session.query(RestaurantPictures).filter(RestaurantPictures.id == picture_id).one()
+            return picture.as_dict() if picture else None
     except :
         return None
 
