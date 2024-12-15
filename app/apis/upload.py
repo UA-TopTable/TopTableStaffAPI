@@ -84,8 +84,8 @@ class ImageUpload(Resource):
                 uploaded_url.append(file_url)
                 #Fill in the DB with the new image
                 add_picture(file_url, restaurant_id)
-                if i == 0 :
-                    edit_restaurant_main_picture(file_url, restaurant_id)
+                if i == 0 and get_restaurant(restaurant_id)[0]['restaurant_image'] == '' :
+                    edit_restaurant_main_picture(restaurant_id, file_url)
                 i+=1
 
             except (NoCredentialsError, PartialCredentialsError):
@@ -227,9 +227,13 @@ class DeletePicture(Resource):
                     restaurant_pictures = get_pictures(restaurant_id)
                     edit_main_picture = None
                     if restaurant_pictures is not None and len(restaurant_pictures) > 0 :
-                        edit_main_picture = edit_restaurant_main_picture(restaurant_pictures[0]['link'], restaurant_id)
-                    if edit_main_picture == False or edit_main_picture == None :
+                        edit_main_picture = edit_restaurant_main_picture(restaurant_id, restaurant_pictures[0]['link'])
+                    else :
+                        edit_main_picture = edit_restaurant_main_picture(restaurant_id, '')
                         return {"message": "Picture deleted, no other pictures available to be main picture", "restaurant_id": restaurant_id}, 500
+                    if edit_main_picture == False :
+                        edit_main_picture = edit_restaurant_main_picture(restaurant_id, '')
+                        return {"message": "Picture deleted, not possible to change the main picture", "restaurant_id": restaurant_id}, 500
                 try :
                     s3_delete.Object(bucket_name = S3_BUCKET, key = picture['link'])
                 except Exception as e :
