@@ -30,7 +30,6 @@ class RestaurantPage(Resource):
         working_hours = get_working_hours(id, None)
         if not (pictures == [] or pictures is None):
             for picture in pictures : 
-                link = picture['link']
                 parsed_url = urlparse(picture['link'])
                 
                 bucket_name = parsed_url.netloc.split('.')[0]
@@ -41,7 +40,7 @@ class RestaurantPage(Resource):
                         Params={'Bucket': bucket_name, 'Key': object_key},
                         ExpiresIn=3600 
                 )
-                if link == main_picture:
+                if picture['link'] == main_picture:
                     picture['link'] = signed_url
                     pictures_list.insert(0, picture)
                 else :
@@ -52,7 +51,7 @@ class RestaurantPage(Resource):
             return make_response("No restaurant found", 404)
         else:
             return make_response(
-                render_template("manage_restaurant.html", restaurant=restaurant, tables=tables, pictures = pictures, working_hours = working_hours, coworkers = coworkers),
+                render_template("manage_restaurant.html", restaurant=restaurant, tables=tables, pictures = pictures_list, working_hours = working_hours, coworkers = coworkers),
                 200,
                 {'Content-Type': 'text/html'}
             )
