@@ -1,10 +1,9 @@
 import boto3
-from flask_restx import Namespace, Resource, fields, Api
+from flask_restx import Namespace, Resource, fields
 from botocore.exceptions import NoCredentialsError, PartialCredentialsError
-from flask import Flask, request, jsonify, redirect
+from flask import request
 from werkzeug.utils import secure_filename
-from data.db_engine import DATABASE_URL
-from services.db_service import add_picture, get_pictures, get_restaurant, edit_restaurant_main_picture, edit_food_category, get_picture_by_id, add_restaurant, modify_description, add_working_hours, get_working_hours, modify_working_hours, delete_picture, get_restaurant_by_owner
+from services.db_service import add_picture, delete_working_hours, get_reservations, remove_coworker, delete_reservation, get_coworkers_by_restaurant_id, get_all_tables, delete_table, delete_restaurant, get_pictures, get_restaurant, edit_restaurant_main_picture, edit_food_category, get_picture_by_id, add_restaurant, modify_description, add_working_hours, get_working_hours, modify_working_hours, delete_picture, get_restaurant_by_owner
 from services.auth_service import get_user
 from datetime import datetime
 from string import ascii_letters, digits
@@ -303,7 +302,6 @@ class CreateRestaurant(Resource):
                 return {"message": str(e)}, 500
 
             data['restaurant_image']=uploaded_url[0]
-            print(data)
             result = add_restaurant(data)
 
             if isinstance(result, dict) :
@@ -357,7 +355,7 @@ class EditFoodCategory(Resource):
 class EditRestaurantMainPicture(Resource):
     @api.doc("Edit the picture showed in the home page")
     @api.expect({
-        "picture_link":fields.String(required=True)
+        "picture_id":fields.String(required=True)
     })
     @api.response(200,"Main picture edited")
     @api.response(403,"You are not logged in")
@@ -387,5 +385,74 @@ class EditRestaurantMainPicture(Resource):
                 return {"message": "Main picture edited", "restaurant_id": restaurant_id}, 200
             else: 
                 return {"message": "Main picture not edited", "restaurant_id": restaurant_id}, 500
+        except Exception as e :
+            return {"message": 'Error : ' + str(e)}, 500
+        
+@api.route('/delete_restaurant/<int:restaurant_id>')
+class DeleteRestaurant(Resource):
+    @api.doc("Delete a restaurant")
+    @api.response(200,"Restaurant deleted")
+    @api.response(403,"You are not logged in")
+    @api.response(500,"Restaurant not deleted")
+    def delete(self, restaurant_id):
+        try:
+            if 'x-amzn-oidc-accesstoken' in request.headers:
+                access_token = request.headers.get('x-amzn-oidc-accesstoken')
+            elif "access_token" in request.cookies:
+                access_token=request.cookies.get("access_token")
+            else:
+                return "You are not logged in", 403
+            
+            user=get_user(access_token)
+            if user is None:
+                return "You are not logged in", 403
+            restaurants = get_restaurant_by_owner(user.get('id'))
+            if restaurants is None or int(restaurant_id) not in [restaurant.get('id') for restaurant in restaurants]:
+                return "You are not the owner of this restaurant", 403
+            
+
+            pictures = get_pictures(restaurant_id)
+            dining_tables = get_all_tables(restaurant_id)
+            coworkers = get_coworkers_by_restaurant_id(restaurant_id)
+            reservations = get_reservations(restaurant_id)
+            working_hours = get_working_hours(restaurant_id, None)
+
+            for picture in pictures :
+                try :
+                    s3_delete.Object(bucket_name = S3_BUCKET, key = picture['link'])
+                    delete_picture(picture['id'], restaurant_id)
+                except Exception as e :
+                    return {"message": 'Error : ' + str(e)}, 500
+
+            for table in dining_tables :
+                try :
+                    delete_table(table['id'])
+                except Exception as e :
+                    return {"message": 'Error : ' + str(e)}, 500
+                
+            for reservation in reservations :
+                try :
+                    delete_reservation(reservation['id'])
+                except Exception as e :
+                    return {"message": 'Error : ' + str(e)}, 500
+                
+            for coworker in coworkers :
+                try :
+                    remove_coworker(coworker['id'])
+                except Exception as e :
+                    return {"message": 'Error : ' + str(e)}, 500
+            
+            for working_hour in working_hours :
+                try :
+                    delete_working_hours(working_hour['id'])
+                except Exception as e :
+                    return {"message": 'Error : ' + str(e)}, 500
+            
+            result = delete_restaurant(restaurant_id)
+            if result:
+                return {"message": "Restaurant deleted", "restaurant_id": restaurant_id}, 200
+            else: 
+                return {"message": "Restaurant not deleted", "restaurant_id": restaurant_id}, 500
+
         except Exception as e :
             return {"message": 'Error : ' + str(e)}, 500

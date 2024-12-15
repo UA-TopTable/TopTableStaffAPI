@@ -152,6 +152,18 @@ def modify_working_hours(restaurant_id, day_of_week,opening_time,closing_time):
         session.commit()
         return working_hours.as_dict() if working_hours else None
 
+def delete_working_hours(restaurant_id, day_of_week):
+    try :
+        working_hours = get_working_hours(restaurant_id, day_of_week)
+        if working_hours is None :
+            return None
+        with Session(engine) as session:
+            session.delete(working_hours)
+            session.commit()
+            return True
+    except :
+        return None
+
 def get_reservations(restaurant_id):
     with Session(engine) as session:
         return session.query(Reservation).filter(
@@ -316,5 +328,41 @@ def edit_restaurant_main_picture(restaurant_id, picture_link):
             restaurant.restaurant_image = picture_link
             session.commit()
             return restaurant.as_dict() if restaurant else None
+    except :
+        return None
+    
+def delete_restaurant(restaurant_id):
+    try :
+        with Session(engine) as session:
+            restaurant = session.query(Restaurant).filter(Restaurant.id == restaurant_id).first()
+            if restaurant is None:
+                return None
+            session.delete(restaurant)
+            session.commit()
+            return True
+    except :
+        return None
+    
+def delete_table(table_id):
+    try :
+        with Session(engine) as session:
+            table = session.query(DiningTable).filter(DiningTable.id == table_id).first()
+            if table is None:
+                return None
+            session.delete(table)
+            session.commit()
+            return True
+    except :
+        return None
+
+def delete_reservation(reservation_id):
+    try :
+        with Session(engine) as session:
+            reservation = session.query(Reservation).filter(Reservation.id == reservation_id).first()
+            if reservation is None:
+                return None
+            session.delete(reservation)
+            session.commit()
+            return True
     except :
         return None

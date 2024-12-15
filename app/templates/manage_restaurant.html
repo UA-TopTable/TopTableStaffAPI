@@ -128,6 +128,11 @@
                     {% endfor %}
                 </ul>
             </div>
+            <div class="row">
+                <button type="button" class="btn btn-danger ms-3" data-bs-toggle="modal" data-bs-target="#deleteRestaurantModal">
+                    Delete Restaurant
+                </button>
+            </div>
         </div>
         <div class="col-1"></div>
         <div class="col">
@@ -256,7 +261,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="descriptionModalLabel">Upload pictures</h5>
+                <h5 class="modal-title" id="descriptionModalLabel">Modify the description</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -301,6 +306,23 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="deleteRestaurantModal" tabindex="-1" aria-labelledby="deleteRestaurantModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteRestaurantModalLabel">Are you sure you want to delete this restaurant ? It could not be retrieved later !</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="d-flex row">
+                    <button class="btn btn-danger" onclick="deleteRestaurant('{{restaurant.id}}')"> Confirm deletion</i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% endblock %}
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
@@ -320,9 +342,8 @@
 
             const restaurantIdInput = document.getElementById('restaurant_id');
             const pathArray = window.location.pathname.split('/');
-            const restaurantId = pathArray[pathArray.length - 1]; // récupère le dernier élément du chemin
+            const restaurantId = pathArray[pathArray.length - 1]; 
 
-            // Prepare data for POST request
             const data = {
                 table_number: tableNumber,
                 number_of_seats: numberOfSeats,
@@ -356,16 +377,15 @@
         const formData = new FormData();
         const fileInput = document.getElementById('file');
         const pathArray = window.location.pathname.split('/');
-        const restaurantId = pathArray[pathArray.length - 1]; // Récupère le dernier élément du chemin
+        const restaurantId = pathArray[pathArray.length - 1]; 
 
         if (fileInput.files.length === 0) {
             alert('Please select at least one picture to upload.');
             return;
         }
 
-        // Ajouter chaque fichier à formData
         for (let i = 0; i < fileInput.files.length; i++) {
-            formData.append('files[]', fileInput.files[i]); // 'files[]' pour indiquer un tableau de fichiers
+            formData.append('files[]', fileInput.files[i]);
         }
 
         formData.append('restaurant_id', restaurantId);
@@ -403,7 +423,7 @@
         const restaurantIdInput = document.getElementById('restaurant_id');
 
         const pathArray = window.location.pathname.split('/');
-        const restaurantId = pathArray[pathArray.length - 1]; // récupère le dernier élément du chemin
+        const restaurantId = pathArray[pathArray.length - 1]; 
 
 
 
@@ -538,7 +558,7 @@
             body: JSON.stringify(data),
         })
             .then(response => {
-                console.log(response); // Vérifie l'objet réponse
+                console.log(response); 
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
@@ -567,7 +587,7 @@
             body: JSON.stringify(data),
         })
             .then(response => {
-                console.log(response); // Vérifie l'objet réponse
+                console.log(response);
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
@@ -584,13 +604,11 @@
     document.addEventListener("DOMContentLoaded", () => {
         const foodCategorySelect = document.getElementById("food_category");
 
-        // Appeler l'API pour récupérer les catégories
         fetch("/staff/api/v1/restaurant/food_categories")
             .then(response => response.json())
             .then(data => {
                 const categories = data.categories;
 
-                // Ajouter chaque catégorie comme option
                 categories.forEach(category => {
                     const option = document.createElement("option");
                     option.value = category;
@@ -607,7 +625,7 @@
         const foodCategorySelect = document.getElementById("food_category");
 
         const pathArray = window.location.pathname.split('/');
-        const restaurantId = pathArray[pathArray.length - 1]; // récupère le dernier élément du chemin
+        const restaurantId = pathArray[pathArray.length - 1];
 
         fetch(`/staff/api/v1/upload/edit_food_category/${restaurantId}`, {
             method: 'POST',
@@ -633,6 +651,26 @@
             });
     });
 </script>
+
+<script>
+    function deleteRestaurant(restaurant_id) {
+        console.log(restaurant_id);
+        fetch(`/staff/api/v1/upload/delete_restaurant/${restaurant_id}`, {
+            method: "DELETE"
+        })
+        .then(response => {
+            console.log(response);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => console.log(data))
+        .then(() => location.reload())
+        .catch(error => console.error('Error:', error));
+    }
+</script>
+
 
 {% endblock %}
 
