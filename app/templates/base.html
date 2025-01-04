@@ -167,6 +167,7 @@
       return new Date(dateTimeString).toLocaleString([], options);
     }
     console.log("starting listen");
+    socket.emit('listen_for_reservation_requests');
 
   </script>
 
