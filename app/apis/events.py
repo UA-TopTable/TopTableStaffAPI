@@ -3,7 +3,7 @@ import os
 import sys
 import boto3
 from flask import request
-from flask_socketio import emit
+from flask_socketio import emit, join_room, leave_room
 
 
 from app import socketio
@@ -11,6 +11,7 @@ from services.auth_service import get_user
 from services.email_service import send_reservation_response_email
 from services.db_service import get_all_restaurants_by_owner_email, get_reservation_by_id, get_restaurant, get_restaurant_by_owner, get_table_by_id, get_user_by_id, update_reservation
 from services.queue_service import delete_reservation_confirmation, get_reservation_confirmation
+
 
 @socketio.on('connect')
 def connect():
@@ -88,7 +89,9 @@ def confirm_reservation(data):
         socketio.emit("reservation_confirmed",{"reservation":reservation.as_dict()})
 
     delete_reservation_confirmation(receipt_handle,queue_url=os.getenv("SQS_RESERVATION_RESQUESTS_QUEUE_URL"))
-    send_reservation_response_email("confirmed",sender_email,reservation_id)
+    
+    #would work if we got authorization from AWS, but we don't
+    #send_reservation_response_email("cancelled",sender_email,reservation_id)
 
 
 
@@ -104,7 +107,9 @@ def cancel_reservation(data):
 
     if reservation is not None:
         socketio.emit("reservation_cancelled",{"reservation":reservation.as_dict()})
-        
+
     delete_reservation_confirmation(receipt_handle,queue_url=os.getenv("SQS_RESERVATION_RESQUESTS_QUEUE_URL"))
-    send_reservation_response_email("cancelled",sender_email,reservation_id)
+
+    #would work if we got authorization from AWS, but we don't
+    #send_reservation_response_email("cancelled",sender_email,reservation_id)
         

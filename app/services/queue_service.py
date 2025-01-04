@@ -3,7 +3,6 @@ import os
 import sys
 import boto3
 
-
 def get_reservation_confirmation(restaurant_id_list,sqs=boto3.client('sqs', region_name='us-east-1'),queue_url=os.getenv("SQS_RESERVATION_RESQUESTS_QUEUE_URL")):
     while True:
         response=sqs.receive_message(
