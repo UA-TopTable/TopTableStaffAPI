@@ -88,8 +88,7 @@ def confirm_reservation(data):
     if reservation is not None:
         socketio.emit("reservation_confirmed",{"reservation":reservation.as_dict()})
 
-    #because I am using sandbox, I lack the permissions to delete messages
-    #delete_reservation_confirmation(receipt_handle,queue_url=os.getenv("SQS_RESERVATION_RESQUESTS_QUEUE_URL"))
+    delete_reservation_confirmation(receipt_handle,queue_url=os.getenv("SQS_RESERVATION_RESQUESTS_QUEUE_URL"))
     
     #would work if we got authorization from AWS, but we don't
     #send_reservation_response_email("cancelled",sender_email,reservation_id)
@@ -109,8 +108,7 @@ def cancel_reservation(data):
     if reservation is not None:
         socketio.emit("reservation_cancelled",{"reservation":reservation.as_dict()})
 
-    #because I am using sandbox, I lack the permissions to delete messages
-    #delete_reservation_confirmation(receipt_handle,queue_url=os.getenv("SQS_RESERVATION_RESQUESTS_QUEUE_URL"))
+    delete_reservation_confirmation(receipt_handle,queue_url=os.getenv("SQS_RESERVATION_RESQUESTS_QUEUE_URL"))
 
     #would work if we got authorization from AWS, but we don't
     #send_reservation_response_email("cancelled",sender_email,reservation_id)
