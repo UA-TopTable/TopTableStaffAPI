@@ -16,7 +16,7 @@ def get_reservation_confirmation(restaurant_id_list,sqs=boto3.client('sqs', regi
                 body=message["Body"]
                 body=json.loads(body.replace("'",'"'))
                 print(f"request restaurant id: {body["reservation"]["restaurant_id"]}",file=sys.stderr)
-                if "reservation" in body and int(body["reservation"]["restaurant_id"]) in [restaurant_id_list]:
+                if "reservation" in body and int(body["reservation"]["restaurant_id"]) in restaurant_id_list:
                     return message
 
 
