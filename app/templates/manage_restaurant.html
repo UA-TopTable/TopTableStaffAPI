@@ -17,35 +17,12 @@
                         <button class="btn btn-danger" onclick="deletePicture('{{pic.id}}')">
                             <i class="bi bi-trash"></i>
                         </button>
-                    </div>
-
-
-                    {% endfor %}
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="mainImageModal" tabindex="-1" aria-labelledby="mainImageModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="mainImageModalLabel">Choose Main Image</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="row">
-                    {% for pic in pictures %}
-                    <div class="col-4 mb-3">
-                        <img src="{{ pic.link }}" class="restaurant-page-img img-fluid" alt="{{ pic.link }}">
-                        <button class="btn btn-primary mt-2" onclick="setMainImage('{{pic.id}}')">
-                            Set as Main Image
+                        <button class="btn btn-warning" onclick="setMainImage('{{pic.id}}')">
+                            Set as Main Picture
                         </button>
                     </div>
+
+
                     {% endfor %}
                 </div>
             </div>
@@ -56,7 +33,6 @@
     </div>
 </div>
 {% endif %}
-
 
 <nav class="navbar navbar-light fixed-top bg-white mt-5">
     <div class="container">
@@ -151,6 +127,11 @@
                     </li>
                     {% endfor %}
                 </ul>
+            </div>
+            <div class="row">
+                <button type="button" class="btn btn-danger mt-5 w-50 " data-bs-toggle="modal" data-bs-target="#deleteRestaurantModal">
+                    Delete Restaurant
+                </button>
             </div>
         </div>
         <div class="col-1"></div>
@@ -280,7 +261,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="descriptionModalLabel">Upload pictures</h5>
+                <h5 class="modal-title" id="descriptionModalLabel">Modify the description</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -317,7 +298,7 @@
                                 multiple>
                         </div>
                         <div class="p-2 pt-1">
-                            <button type="submit" class="btn btn-primary">Upload</button>
+                            <button type="submit" id="uploadButton" class="btn btn-primary">Upload</button>
                         </div>
                     </div>
                 </form>
@@ -325,6 +306,23 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="deleteRestaurantModal" tabindex="-1" aria-labelledby="deleteRestaurantModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteRestaurantModalLabel">Are you sure you want to delete this restaurant ? It could not be retrieved later !</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="d-flex justify-content-center row">
+                    <button class="btn btn-danger btn-sm w-50" onclick="deleteRestaurant('{{restaurant.id}}')"> Confirm deletion</i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% endblock %}
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
@@ -344,9 +342,8 @@
 
             const restaurantIdInput = document.getElementById('restaurant_id');
             const pathArray = window.location.pathname.split('/');
-            const restaurantId = pathArray[pathArray.length - 1]; // récupère le dernier élément du chemin
+            const restaurantId = pathArray[pathArray.length - 1]; 
 
-            // Prepare data for POST request
             const data = {
                 table_number: tableNumber,
                 number_of_seats: numberOfSeats,
@@ -380,16 +377,20 @@
         const formData = new FormData();
         const fileInput = document.getElementById('file');
         const pathArray = window.location.pathname.split('/');
-        const restaurantId = pathArray[pathArray.length - 1]; // Récupère le dernier élément du chemin
+        const restaurantId = pathArray[pathArray.length - 1];
+        const uploadButton = document.getElementById("uploadButton");
 
+        
         if (fileInput.files.length === 0) {
             alert('Please select at least one picture to upload.');
             return;
         }
+        
+        uploadButton.textContent = "Uploading...";
+        uploadButton.disabled = true; 
 
-        // Ajouter chaque fichier à formData
         for (let i = 0; i < fileInput.files.length; i++) {
-            formData.append('files[]', fileInput.files[i]); // 'files[]' pour indiquer un tableau de fichiers
+            formData.append('files[]', fileInput.files[i]);
         }
 
         formData.append('restaurant_id', restaurantId);
@@ -402,6 +403,8 @@
                 if (!response.ok) {
                     throw new Error(response.status);
                 }
+                uploadButton.textContent = "Upload";
+                uploadButton.disabled = false;  
                 return response.json();
             })
             .then(data => {
@@ -427,16 +430,9 @@
         const restaurantIdInput = document.getElementById('restaurant_id');
 
         const pathArray = window.location.pathname.split('/');
-        const restaurantId = pathArray[pathArray.length - 1]; // récupère le dernier élément du chemin
+        const restaurantId = pathArray[pathArray.length - 1]; 
 
-
-
-        if (isNaN(restaurantId)) {
-            alert("Veuillez entrer un nombre valide pour le Restaurant ID.");
-            event.preventDefault();
-        }
         formData.append('description', descriptionInput.value);
-        formData.append('restaurant_id', restaurantId);
 
         fetch(`/staff/api/v1/upload/upload_description/${restaurantId}`, {
             method: 'POST',
@@ -456,6 +452,7 @@
                 }
                 window.location.href = `/staff/ui/restaurant/${restaurantId}`
             })
+            .then(() => location.reload())
             .catch(error => {
                 console.log('Error : ' + error.message);
             });
@@ -562,7 +559,7 @@
             body: JSON.stringify(data),
         })
             .then(response => {
-                console.log(response); // Vérifie l'objet réponse
+                console.log(response); 
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
@@ -591,7 +588,7 @@
             body: JSON.stringify(data),
         })
             .then(response => {
-                console.log(response); // Vérifie l'objet réponse
+                console.log(response);
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
@@ -608,13 +605,11 @@
     document.addEventListener("DOMContentLoaded", () => {
         const foodCategorySelect = document.getElementById("food_category");
 
-        // Appeler l'API pour récupérer les catégories
         fetch("/staff/api/v1/restaurant/food_categories")
             .then(response => response.json())
             .then(data => {
                 const categories = data.categories;
 
-                // Ajouter chaque catégorie comme option
                 categories.forEach(category => {
                     const option = document.createElement("option");
                     option.value = category;
@@ -631,7 +626,7 @@
         const foodCategorySelect = document.getElementById("food_category");
 
         const pathArray = window.location.pathname.split('/');
-        const restaurantId = pathArray[pathArray.length - 1]; // récupère le dernier élément du chemin
+        const restaurantId = pathArray[pathArray.length - 1];
 
         fetch(`/staff/api/v1/upload/edit_food_category/${restaurantId}`, {
             method: 'POST',
@@ -657,6 +652,29 @@
             });
     });
 </script>
+
+<script>
+    function deleteRestaurant(restaurant_id) {
+        console.log(restaurant_id);
+        fetch(`/staff/api/v1/upload/delete_restaurant/${restaurant_id}`, {
+            method: "DELETE"
+        })
+        .then(response => {
+            console.log(response);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Deletion successful:', data);
+            // Redirection après suppression réussie
+            window.location.href = "/staff/ui/home";
+        })
+        .catch(error => console.error('Error:', error));
+    }
+</script>
+
 
 {% endblock %}
 

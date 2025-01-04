@@ -1,10 +1,9 @@
 import boto3
-from flask_restx import Namespace, Resource, fields, Api
+from flask_restx import Namespace, Resource, fields
 from botocore.exceptions import NoCredentialsError, PartialCredentialsError
-from flask import Flask, request, jsonify, redirect
+from flask import request
 from werkzeug.utils import secure_filename
-from data.db_engine import DATABASE_URL
-from services.db_service import add_picture, get_pictures, get_restaurant, edit_restaurant_main_picture, edit_food_category, get_picture_by_id, add_restaurant, modify_description, add_working_hours, get_working_hours, modify_working_hours, delete_picture, get_restaurant_by_owner
+from services.db_service import add_picture, delete_working_hours, get_reservations, remove_coworker, delete_reservation, get_coworkers_by_restaurant_id, get_all_tables, delete_table, delete_restaurant, get_pictures, get_restaurant, edit_restaurant_main_picture, edit_food_category, get_picture_by_id, add_restaurant, modify_description, add_working_hours, get_working_hours, modify_working_hours, delete_picture, get_restaurant_by_owner
 from services.auth_service import get_user
 from datetime import datetime
 from string import ascii_letters, digits
@@ -84,8 +83,8 @@ class ImageUpload(Resource):
                 uploaded_url.append(file_url)
                 #Fill in the DB with the new image
                 add_picture(file_url, restaurant_id)
-                if i == 0 :
-                    edit_restaurant_main_picture(file_url, restaurant_id)
+                if i == 0 and get_restaurant(restaurant_id)[0]['restaurant_image'] == '' :
+                    edit_restaurant_main_picture(restaurant_id, file_url)
                 i+=1
 
             except (NoCredentialsError, PartialCredentialsError):
@@ -214,15 +213,30 @@ class DeletePicture(Resource):
             picture_id = data['picture_id']
             picture = get_picture_by_id(picture_id)
             restaurant = get_restaurant(restaurant_id)[0]
-            if picture['link'] == restaurant['restaurant_image'] :
-                restaurant_pictures = get_pictures(restaurant_id)
-                edit_restaurant_main_picture(restaurant_pictures[0]['link'], restaurant_id)
+
+            if picture is None :
+                return {"message": "Picture not found", "restaurant_id": restaurant_id}, 500
+            if restaurant is None :
+                return {"message": "Restaurant not found", "restaurant_id": restaurant_id}, 500
+            
             result = delete_picture(picture_id, restaurant_id)
-            try :
-                s3_delete.Object(bucket_name = S3_BUCKET, key = picture['link'])
-            except Exception as e :
-                return {"message": 'Error : ' + str(e)}, 500
+            
             if result == True :
+                if picture['link'] == restaurant['restaurant_image'] :
+                    restaurant_pictures = get_pictures(restaurant_id)
+                    edit_main_picture = None
+                    if restaurant_pictures is not None and len(restaurant_pictures) > 0 :
+                        edit_main_picture = edit_restaurant_main_picture(restaurant_id, restaurant_pictures[0]['link'])
+                    else :
+                        edit_main_picture = edit_restaurant_main_picture(restaurant_id, '')
+                        return {"message": "Picture deleted, no other pictures available to be main picture", "restaurant_id": restaurant_id}, 200
+                    if edit_main_picture == False :
+                        edit_main_picture = edit_restaurant_main_picture(restaurant_id, '')
+                        return {"message": "Picture deleted, not possible to change the main picture", "restaurant_id": restaurant_id}, 200
+                try :
+                    s3_delete.Object(bucket_name = S3_BUCKET, key = picture['link'])
+                except Exception as e :
+                    return {"message": 'Error : ' + str(e)}, 500
                 return {"message": "Picture deleted", "restaurant_id": restaurant_id}, 200
             else : 
                 return {"message": "Picture not deleted", "restaurant_id": restaurant_id}, 500
@@ -254,7 +268,7 @@ class CreateRestaurant(Resource):
             data['description']=request.form['description']
             data['location_address']=request.form['location_address']
             data['owner_user_id']=request.form['owner_user_id']
-            data['food_category'] = request.form['food_category']
+            data['food_category'] = request.form['food_category'].upper()
             restaurant_image = request.files.get('restaurant_image')
             uploaded_url = []
 
@@ -288,7 +302,6 @@ class CreateRestaurant(Resource):
                 return {"message": str(e)}, 500
 
             data['restaurant_image']=uploaded_url[0]
-            print(data)
             result = add_restaurant(data)
 
             if isinstance(result, dict) :
@@ -338,12 +351,14 @@ class EditFoodCategory(Resource):
         except Exception as e :
             return {"message": 'Error : ' + str(e)}, 500
         
+EditMainPicture_model = api.model('EditMainPicture', {
+    "picture_id":fields.Integer(required=True)
+})
+    
 @api.route('/edit_main_picture/<int:restaurant_id>')
 class EditRestaurantMainPicture(Resource):
     @api.doc("Edit the picture showed in the home page")
-    @api.expect({
-        "picture_link":fields.String(required=True)
-    })
+    @api.expect(EditMainPicture_model)
     @api.response(200,"Main picture edited")
     @api.response(403,"You are not logged in")
     @api.response(403,"You are not the owner of this restaurant")
@@ -367,10 +382,89 @@ class EditRestaurantMainPicture(Resource):
             data = request.json
             picture_id = data['picture_id']
             picture = get_picture_by_id(picture_id)
-            result = edit_restaurant_main_picture(picture['link'], restaurant_id)
+            result = edit_restaurant_main_picture(restaurant_id, picture['link'])
             if result:
                 return {"message": "Main picture edited", "restaurant_id": restaurant_id}, 200
             else: 
                 return {"message": "Main picture not edited", "restaurant_id": restaurant_id}, 500
         except Exception as e :
-            return {"message": 'Error : ' + str(e)}, 500
+            return {"message": 'Error : ' + str(e)}, 500   
+
+@api.route('/delete_restaurant/<int:restaurant_id>')
+class DeleteRestaurant(Resource):
+    @api.doc("Delete a restaurant")
+    @api.response(302,"Restaurant deleted")
+    @api.response(403,"You are not logged in")
+    @api.response(500,"Restaurant not deleted")
+    def delete(self, restaurant_id):
+        try:
+            if 'x-amzn-oidc-accesstoken' in request.headers:
+                access_token = request.headers.get('x-amzn-oidc-accesstoken')
+            elif "access_token" in request.cookies:
+                access_token=request.cookies.get("access_token")
+            else:
+                return "You are not logged in", 403
+            
+            user=get_user(access_token)
+            if user is None:
+                return "You are not logged in", 403
+            restaurants = get_restaurant_by_owner(user.get('id'))
+            if restaurants is None or int(restaurant_id) not in [restaurant.get('id') for restaurant in restaurants]:
+                return "You are not the owner of this restaurant", 403
+            
+
+            pictures = get_pictures(restaurant_id)
+            dining_tables = get_all_tables(restaurant_id)
+            coworkers = get_coworkers_by_restaurant_id(restaurant_id)
+            reservs = get_reservations(restaurant_id)
+            reservations = [reservation.as_dict() for reservation in reservs]
+            working_hours = get_working_hours(restaurant_id, None)
+            
+
+            if pictures is not None :
+                for picture in pictures :
+                    try :
+                        s3_delete.Object(bucket_name = S3_BUCKET, key = picture['link'])
+                        delete_picture(picture['id'], restaurant_id)
+                    except Exception as e :
+                        return {"message": 'Error with pictures : ' + str(e)}, 500
+
+            if dining_tables is not None :
+                for table in dining_tables :
+                    try :
+                        delete_table(table['id'])
+                    except Exception as e :
+                        return {"message": 'Error with tables : ' + str(e)}, 500
+           
+            if reservations is not None :    
+                for reservation in reservations :
+                    try :
+                        delete_reservation(reservation['id'])
+                    except Exception as e :
+                        return {"message": 'Error with reservations : ' + str(e)}, 500
+              
+            if coworkers is not None :
+                for coworker in coworkers :
+                    try :
+                        remove_coworker(restaurant_id, coworker['id'])
+                    except Exception as e :
+                        return {"message": 'Error with coworkers : ' + str(e)}, 500
+          
+            if working_hours is not None :
+                for working_hour in working_hours :
+                    try :
+                        delete_working_hours(restaurant_id, working_hour['day_of_week'])
+                    except Exception as e :
+                        return {"message": 'Error with working hours: ' + str(e)}, 500
+          
+            try :
+                result = delete_restaurant(restaurant_id)
+            except Exception as e :
+                return {"message": 'Error with restaurant : ' + str(e)}, 500
+            if result:
+                return {"message": "Restaurant deleted", "restaurant_id": restaurant_id}, 200
+            else: 
+                return {"message": f"Restaurant not deleted : {result}", "restaurant_id": restaurant_id}, 500
+
+        except Exception as e :
+            return {"message": 'General Error : ' + str(e)}, 500
