@@ -1,4 +1,5 @@
 import os
+import threading
 from flask_socketio import SocketIO
 from flask import Flask,jsonify, redirect, request, session
 from flask_mail import Mail
@@ -33,7 +34,11 @@ mail=Mail(app)
 socketio = SocketIO(app,path=f'{ROOT_PATH_PREFIX}/socket.io')
 
 if __name__ == "__main__":
+    sqs_thread=threading.Thread(target=broadcast_sns_messages)
+    sqs_thread.daemon=True
+    sqs_thread.start()
+
     socketio.run(app)
 
-
+#Do not remove. This ensures that the socket parts are properly loaded when the app is run (that's just how flask/python is)
 from apis.events import *

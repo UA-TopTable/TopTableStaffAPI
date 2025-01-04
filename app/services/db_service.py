@@ -294,7 +294,7 @@ def get_all_restaurants_by_owner_email(email):
         user_account=session.query(UserAccount).filter(UserAccount.email == email).first()
 
         if user_account is None:
-            return None
+            return []
         return get_restaurant_by_owner(user_account.id)
     
 def get_reservation_by_id(reservation_id):
